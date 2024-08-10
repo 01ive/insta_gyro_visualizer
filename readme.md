@@ -25,7 +25,7 @@ Using Python code convert txt exiftool output to csv data
 Exemple
 
 ```bash
-python convert_to_csv.py
+python convert_to_csv.py VID_20240530_173115_003.txt
 ```
 
 ## Filter and view data
