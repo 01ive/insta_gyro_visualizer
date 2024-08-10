@@ -84,4 +84,4 @@ graph.show()
 graph.write_html(csv_file_name.split('.')[0] + '.html')
 
 # Generate json file
-accelerometer_table.filter(['Rotation X', 'Rotation Y', 'Rotation Z'], axis=1).to_json(csv_file_name.split('.')[0] + '.json')
+accelerometer_table.filter(['Rotation X', 'Rotation Y', 'Rotation Z'], axis=1).reset_index().to_json(csv_file_name.split('.')[0] + '.json', orient='records', indent=2)
