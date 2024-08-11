@@ -27,9 +27,11 @@ document.body.appendChild( renderer.domElement );
 // ------------------------------------------------
 
 // Create a Cube Mesh with basic material
-var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+var geometry = new THREE.BoxGeometry( 2, 0.1, 1 );
 var material = new THREE.MeshBasicMaterial( { color: "#FFFFFF" } );
 var cube = new THREE.Mesh( geometry, material );
+
+const value = document.getElementById('value');
 
 // Add cube to Scene
 scene.add( cube );
@@ -39,11 +41,12 @@ var index = 0
 // Render Loop
 var render = function () {
   requestAnimationFrame( render );
-  index += 1;
+  index = document.getElementById('time').valueAsNumber;
 
-  // cube.rotation.x += 0.01;
-  // cube.rotation.y += 0.01;
-
+  value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
+                    " | X: " + sensor_data[index]['Rotation X'].toString() +
+                    " | Y: " + sensor_data[index]['Rotation Y'].toString() +
+                    " | Z: " + sensor_data[index]['Rotation Z'].toString();
   cube.rotation.x = sensor_data[index]['Rotation X'];
   cube.rotation.y = sensor_data[index]['Rotation Y'];
   cube.rotation.z = sensor_data[index]['Rotation Z'];
@@ -52,5 +55,3 @@ var render = function () {
   // Render the scene
   renderer.render(scene, camera);
 };
-
-// render();

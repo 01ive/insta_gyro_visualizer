@@ -6,6 +6,7 @@
   <style>
     body { margin: 0; }
     canvas { width: 100%; height: 100% }
+    #time { width: 90% }
   </style>
   <!--  Three.js CDN  -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
@@ -15,7 +16,11 @@
         <label id="my-file-selector" for="file-selector"></label>
         <input type="file" id="file-selector" accept=".json">
     </div>
-
+    <div id="value">---- / ----</div>
+    <div>
+      <input type="range" id="time" name="time" min="0" max="1000"/>
+      <label for="time">Time</label>
+    </div>
   <!--  Our code  -->
   <script src="app.js"></script>
   <script>
@@ -34,7 +39,8 @@
     });
 
     function read_file(file) {
-      sensor_data = JSON.parse(file)
+      sensor_data = JSON.parse(file);
+      document.getElementById('time').max = sensor_data.length.toString();
       render();
     }
 
