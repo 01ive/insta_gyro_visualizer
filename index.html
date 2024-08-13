@@ -24,7 +24,6 @@
   <!--  Our code  -->
   <script src="app.js"></script>
   <script>
-    var sensor_data;
     // Load file button
     const fileSelector = document.getElementById('file-selector');
     let current_file;
@@ -41,10 +40,8 @@
     function read_file(file) {
       sensor_data = JSON.parse(file);
       document.getElementById('time').max = sensor_data.length.toString();
-      render();
-    }
-
-    
+      // render();
+    }    
   </script>
 </body>
 </html>

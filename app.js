@@ -36,24 +36,29 @@ const value = document.getElementById('value');
 // Add cube to Scene
 scene.add( cube );
 
-var index = 0
+var index = 0;
+var sensor_data = [];
 
 // Render Loop
 var render = function () {
   requestAnimationFrame(render);
   
-  // Get cursor position
-  index = document.getElementById('time').valueAsNumber;
-  // Print debug text
-  value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
-                    " | X: " + sensor_data[index]['Rotation X'].toString() +
-                    " | Y: " + sensor_data[index]['Rotation Y'].toString() +
-                    " | Z: " + sensor_data[index]['Rotation Z'].toString();
-  // Rotate object
-  cube.rotation.x = sensor_data[index]['Rotation X'];
-  cube.rotation.y = sensor_data[index]['Rotation Y'];
-  cube.rotation.z = sensor_data[index]['Rotation Z'];
-  
+  if(sensor_data.length > 0) {
+    // Get cursor position
+    index = document.getElementById('time').valueAsNumber;
+    // Print debug text
+    value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
+                      " | X: " + sensor_data[index]['Rotation X'].toString() +
+                      " | Y: " + sensor_data[index]['Rotation Y'].toString() +
+                      " | Z: " + sensor_data[index]['Rotation Z'].toString();
+    // Rotate object
+    cube.rotation.x = sensor_data[index]['Rotation X'];
+    cube.rotation.y = sensor_data[index]['Rotation Y'];
+    cube.rotation.z = sensor_data[index]['Rotation Z'];
+  }
+
   // Render the scene
   renderer.render(scene, camera);
 };
+
+render();
