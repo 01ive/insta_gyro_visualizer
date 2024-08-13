@@ -1,47 +1,67 @@
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Three.js 101</title>
   <!--  Simple reset to delete the margins  -->
   <style>
-    body { margin: 0; }
-    canvas { width: 100%; height: 100% }
-    #time { width: 90% }
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%
+    }
+
+    #time {
+      width: 90%
+    }
   </style>
   <!--  Three.js CDN  -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+      }
+    }
+  </script>
 </head>
+
 <body>
-    <div id="menu_button">
-        <label id="my-file-selector" for="file-selector"></label>
-        <input type="file" id="file-selector" accept=".json">
-    </div>
-    <div id="value">---- / ----</div>
-    <div>
-      <input type="range" id="time" name="time" min="0" max="1000"/>
-      <label for="time">Time</label>
-    </div>
+  <div id="menu_button">
+    <label id="my-file-selector" for="file-selector"></label>
+    <input type="file" id="file-selector" accept=".json">
+  </div>
+  <div id="value">---- / ----</div>
+  <div>
+    <input type="range" id="time" name="time" min="0" max="1000" />
+    <label for="time">Time</label>
+  </div>
   <!--  Our code  -->
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
   <script>
+    var sensor_data = [];
+
     // Load file button
     const fileSelector = document.getElementById('file-selector');
     let current_file;
     fileSelector.addEventListener('change', (event) => {
-        const fileList = event.target.files;
-        const reader = new FileReader();
-        reader.addEventListener('load', (event) => {
-            current_file = event.target.result;
-            read_file(current_file);
-        });
-        reader.readAsText(fileList[0]);
+      const fileList = event.target.files;
+      const reader = new FileReader();
+      reader.addEventListener('load', (event) => {
+        current_file = event.target.result;
+        read_file(current_file);
+      });
+      reader.readAsText(fileList[0]);
     });
 
     function read_file(file) {
       sensor_data = JSON.parse(file);
       document.getElementById('time').max = sensor_data.length.toString();
-      // render();
     }    
   </script>
 </body>
+
 </html>

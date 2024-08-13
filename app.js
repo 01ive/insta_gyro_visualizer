@@ -1,3 +1,5 @@
+import * as THREE from "three"
+
 // ------------------------------------------------
 // BASIC SETUP
 // ------------------------------------------------
@@ -11,16 +13,12 @@ camera.position.z = 4;
 
 // Create a renderer with Antialiasing
 var renderer = new THREE.WebGLRenderer({antialias:true});
-
 // Configure renderer clear color
 renderer.setClearColor("#00FF00");
-
 // Configure renderer size
 renderer.setSize( window.innerWidth, window.innerHeight );
-
 // Append Renderer to DOM
 document.body.appendChild( renderer.domElement );
-
 
 // ------------------------------------------------
 // FUN STARTS HERE
@@ -36,8 +34,10 @@ const value = document.getElementById('value');
 // Add cube to Scene
 scene.add( cube );
 
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add( axesHelper );
+
 var index = 0;
-var sensor_data = [];
 
 // Render Loop
 var render = function () {
