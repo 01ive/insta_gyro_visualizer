@@ -14,7 +14,7 @@ camera.position.z = 4;
 // Create a renderer with Antialiasing
 var renderer = new THREE.WebGLRenderer({antialias:true});
 // Configure renderer clear color
-renderer.setClearColor("#00FF00");
+renderer.setClearColor("#000000");
 // Configure renderer size
 renderer.setSize( window.innerWidth, window.innerHeight );
 // Append Renderer to DOM
@@ -26,7 +26,8 @@ document.body.appendChild( renderer.domElement );
 
 // Create a Cube Mesh with basic material
 var geometry = new THREE.BoxGeometry( 2, 0.1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: "#000000" } );
+var material = new THREE.MeshBasicMaterial( { color: "#FFFFFF" } );
+
 var cube = new THREE.Mesh( geometry, material );
 
 const value = document.getElementById('value');
@@ -34,13 +35,13 @@ const value = document.getElementById('value');
 // Add cube to Scene
 scene.add( cube );
 
-// const axesHelper = new THREE.AxesHelper(5);
-// scene.add( axesHelper );
+const axesHelper = new THREE.AxesHelper(5);
+scene.add( axesHelper );
 
 var index = 0;
 
 // Render Loop
-var render = function () {
+function render() {
   requestAnimationFrame(render);
   
   if(sensor_data.length > 0) {

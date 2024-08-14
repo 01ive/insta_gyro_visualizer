@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Edge",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Py: convert_to_csv.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "convert_to_csv.py",
+            "args": ["VID_20240530_173115_003.txt"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Py: compute_data.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "compute_data.py",
+            "args": ["VID_20240530_173115_003.csv"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Py: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
