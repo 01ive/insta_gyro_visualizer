@@ -4,6 +4,7 @@
         "label": "run npx server",
         "command": "cmd",
         "args": ["/c", "run_auto.bat"],
-        "type": "shell"
+        "type": "shell",
+        "group": {"kind": "build", "isDefault": true},
     }]
 }
