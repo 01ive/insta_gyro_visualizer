@@ -29,7 +29,7 @@ const loader = new THREE.ObjectLoader();
 
 loader.load(
 	// resource URL
-	"paragliding.json",
+	"camera.json",
 
 	// onLoad callback
 	// Here the loaded data is assumed to be an object
@@ -68,9 +68,9 @@ function render() {
                       " | Y: " + sensor_data[index]['Rotation Y'].toString() +
                       " | Z: " + sensor_data[index]['Rotation Z'].toString();
     // Rotate object
-    cube.rotation.x = sensor_data[index]['Rotation X'];
-    cube.rotation.y = sensor_data[index]['Rotation Y'];
-    cube.rotation.z = sensor_data[index]['Rotation Z'];
+    cube.rotation.y = sensor_data[index]['Rotation X'];
+    cube.rotation.z = - sensor_data[index]['Rotation Y'];
+    cube.rotation.x = - sensor_data[index]['Rotation Z'];
   }
 
   // Render the scene

@@ -1,0 +1,82 @@
+{
+	"metadata": {
+		"version": 4.6,
+		"type": "Object",
+		"generator": "Object3D.toJSON"
+	},
+	"geometries": [
+		{
+			"uuid": "31675776-5281-425b-a9d0-fe8e7f32de5c",
+			"type": "CylinderGeometry",
+			"radiusTop": 1,
+			"radiusBottom": 1,
+			"height": 3.5,
+			"radialSegments": 32,
+			"heightSegments": 1,
+			"openEnded": false,
+			"thetaStart": 0,
+			"thetaLength": 6.283185307179586
+		},
+		{
+			"uuid": "c17dd7e6-8dfb-4862-942c-0c5dc143fcb2",
+			"type": "CylinderGeometry",
+			"radiusTop": 0.5,
+			"radiusBottom": 0.5,
+			"height": 2,
+			"radialSegments": 32,
+			"heightSegments": 1,
+			"openEnded": false,
+			"thetaStart": 0,
+			"thetaLength": 6.283185307179586
+		}],
+	"materials": [
+		{
+			"uuid": "3d4fed42-6382-4e00-bf30-0c1e47adf3ab",
+			"type": "MeshBasicMaterial",
+			"color": 7960953,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		},
+		{
+			"uuid": "033705e5-61e3-4fd0-8eae-be86a1ae1af5",
+			"type": "MeshBasicMaterial",
+			"color": 13171967,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		}],
+	"object": {
+		"uuid": "66d66ea3-7bb7-44d0-af2f-d5599bfc2e4a",
+		"type": "Group",
+		"name": "camera",
+		"layers": 1,
+		"matrix": [0.5,0,0,0,0,0.5,0,0,0,0,0.5,0,0,0,0,1],
+		"up": [0,1,0],
+		"children": [
+			{
+				"uuid": "9dcdaaa5-b009-4cd6-969d-5701dd2de751",
+				"type": "Mesh",
+				"name": "Cylinder",
+				"layers": 1,
+				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,1.75,0,1],
+				"up": [0,1,0],
+				"geometry": "31675776-5281-425b-a9d0-fe8e7f32de5c",
+				"material": "3d4fed42-6382-4e00-bf30-0c1e47adf3ab"
+			},
+			{
+				"uuid": "7b1f67f7-c308-40af-aae1-f5dda6ae6e8e",
+				"type": "Mesh",
+				"name": "Cylinder",
+				"layers": 1,
+				"matrix": [1,0,0,0,0,-2.220446049250313e-16,1.0000000000000002,0,0,-1.0000000000000002,-2.220446049250313e-16,0,0,2.75,0,1],
+				"up": [0,1,0],
+				"geometry": "c17dd7e6-8dfb-4862-942c-0c5dc143fcb2",
+				"material": "033705e5-61e3-4fd0-8eae-be86a1ae1af5"
+			}]
+	}
+}
