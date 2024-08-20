@@ -23,50 +23,32 @@ document.body.appendChild( renderer.domElement );
 // ------------------------------------------------
 // FUN STARTS HERE
 // ------------------------------------------------
+var cube;
 
-// Create a Cube Mesh with basic material
-var geometry = new THREE.BoxGeometry( 2, 0.1, 1 ).toNonIndexed();
-var material = new THREE.MeshBasicMaterial( { vertexColors: true } );
+const loader = new THREE.ObjectLoader();
 
-const positionAttribute = geometry.getAttribute( 'position' );
-const colors = [];
-const color = new THREE.Color();
-for ( let i = 0; i < positionAttribute.count; i += 6 ) {
-  switch(i) {
-    case 0:
-      color.set( 0xffff00 );  // Yellow
-      break;
-    case 6:
-      color.set( 0xffff00 );  // Yellow
-      break;
-    case 12:
-      color.set( 0x00ff00 );  // Green
-      break;
-    case 18:
-      color.set( 0xffffff );  // white
-      break;
-    default:
-      color.set( 0xffffff );  // default
-      break;
-  }
+loader.load(
+	// resource URL
+	"paragliding.json",
 
-  // define the same color for each vertex of a triangle
-  colors.push( color.r, color.g, color.b );
-  colors.push( color.r, color.g, color.b );
-  colors.push( color.r, color.g, color.b );
-  colors.push( color.r, color.g, color.b );
-  colors.push( color.r, color.g, color.b );
-  colors.push( color.r, color.g, color.b );
-}
-// define the new attribute
-geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+	// onLoad callback
+	// Here the loaded data is assumed to be an object
+	function ( obj ) {
+    cube = obj;
+		// Add the loaded object to the scene
+		scene.add( cube );
+	},
 
-var cube = new THREE.Mesh( geometry, material );
+	// onProgress callback
+	function ( xhr ) {
+		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	},
 
-const value = document.getElementById('value');
-
-// Add cube to Scene
-scene.add( cube );
+	// onError callback
+	function ( err ) {
+		console.error( 'An error happened' );
+	}
+);
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add( axesHelper );
