@@ -28,6 +28,14 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Py: view_gyro.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "view_gyro.py",
+            "args": ["tests//VID_20240530_173115_003.insv"],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Py: Current File",
             "type": "debugpy",
             "request": "launch",
