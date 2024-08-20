@@ -46,7 +46,7 @@ loader.load(
 
 	// onError callback
 	function ( err ) {
-		console.error( 'An error happened' );
+		console.error( 'An error happened:' + err );
 	}
 );
 
