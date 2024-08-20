@@ -62,11 +62,16 @@ function render() {
   if(sensor_data.length > 0) {
     // Get cursor position
     index = document.getElementById('time').valueAsNumber;
+
+    let assiette = - sensor_data[index]['Rotation Z'] * 180 / Math.PI;
+    let roulis = - sensor_data[index]['Rotation Y'] * 180 / Math.PI;
+    let lacet = sensor_data[index]['Rotation X'] * 180 / Math.PI;
+
     // Print debug text
     value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
-                      " | X: " + sensor_data[index]['Rotation X'].toString() +
-                      " | Y: " + sensor_data[index]['Rotation Y'].toString() +
-                      " | Z: " + sensor_data[index]['Rotation Z'].toString();
+                      " | assiette: " + assiette.toPrecision(3).toString() +
+                      " | roulis: " + roulis.toPrecision(3).toString() +
+                      " | lacet: " + lacet.toPrecision(3).toString();
     // Rotate object
     cube.rotation.y = sensor_data[index]['Rotation X'];
     cube.rotation.z = - sensor_data[index]['Rotation Y'];
