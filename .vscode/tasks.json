@@ -1,0 +1,9 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+        "label": "run npx server",
+        "command": "cmd",
+        "args": ["/c", "run_auto.bat"],
+        "type": "shell"
+    }]
+}
