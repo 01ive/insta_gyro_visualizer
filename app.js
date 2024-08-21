@@ -8,8 +8,10 @@ import * as THREE from "three"
 var scene = new THREE.Scene();
 
 // Create a basic perspective camera
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-camera.position.z = 4;
+var camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 0.1, 1000 );
+camera.position.y = -5;
+camera.rotation.x = Math.PI/2;
+camera.rotation.z = -Math.PI/2;
 
 // Create a renderer with Antialiasing
 var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -73,9 +75,9 @@ function render() {
                       " | roulis: " + roulis.toPrecision(3).toString() +
                       " | lacet: " + lacet.toPrecision(3).toString();
     // Rotate object
-    cube.rotation.y = sensor_data[index]['Rotation X'];
-    cube.rotation.z = - sensor_data[index]['Rotation Y'];
-    cube.rotation.x = - sensor_data[index]['Rotation Z'];
+    cube.rotation.x = sensor_data[index]['Rotation X'];
+    cube.rotation.y = sensor_data[index]['Rotation Y'];
+    cube.rotation.z = sensor_data[index]['Rotation Z'];
   }
 
   // Render the scene
