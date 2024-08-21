@@ -31,7 +31,7 @@ const loader = new THREE.ObjectLoader();
 
 loader.load(
 	// resource URL
-	"camera.json",
+	"insta.json",
 
 	// onLoad callback
 	// Here the loaded data is assumed to be an object
@@ -71,9 +71,9 @@ function render() {
 
     // Print debug text
     value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
-                      " | assiette: " + assiette.toPrecision(3).toString() +
-                      " | roulis: " + roulis.toPrecision(3).toString() +
-                      " | lacet: " + lacet.toPrecision(3).toString();
+                      " | assiette: " + assiette.toFixed(0).toString() + "°" +
+                      " | roulis: " + roulis.toFixed(0).toString() + "°" +
+                      " | lacet: " + lacet.toFixed(0).toString() + "°";
     // Rotate object
     cube.rotation.x = sensor_data[index]['Rotation X'];
     cube.rotation.y = sensor_data[index]['Rotation Y'];
