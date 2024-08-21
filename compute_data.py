@@ -2,6 +2,9 @@ import sys
 import pandas as pd
 import plotly.express as px
 import numpy as np
+import logging
+
+from progress.bar import Bar
 
 pd.options.plotting.backend = "plotly"
 
@@ -12,14 +15,20 @@ rotation_bias_processing = True
 
 ''' Functions '''
 def low_pass(data, filter):
+    progress_bar = Bar("Low pass " + data.name, max=len(data))
     for i in range(1, len(data)):
         data[i] = filter*data[i-1] + (1-filter)*data[i]
+        progress_bar.next()
+    progress_bar.finish()
     return data
 
 def remove_bias(data):
     bias_filter = np.pi / 13
     medium_last = data[0]
     bias = 0
+
+    progress_bar = Bar("Remove bias " + data.name, max=len(data))
+
     for i in range(1, len(data)):
         if(np.abs(data[i] - medium_last) < bias_filter):
             bias = np.abs(medium_last)
@@ -27,10 +36,14 @@ def remove_bias(data):
         else:
             pass
         data[i] = data[i] - np.sign(data[i]) * bias
-
+        progress_bar.next()
+    
+    progress_bar.finish()
     return data
 
 def compute_data(csv_file_name):
+    logging.info("Start computing data from file: " + csv_file_name)
+
     accelerometer_table = pd.read_csv(csv_file_name, sep='\t', index_col=0)
 
     # Calculate time starting to 0
@@ -40,6 +53,7 @@ def compute_data(csv_file_name):
 
     # Low pass filter on Rotation sensor
     if rotation_low_pass:
+        logging.info("Low pass filter calculation")
         accelerometer_table['Rot X'] = low_pass(accelerometer_table['Rot X'], 0.99)
         accelerometer_table['Rot Y'] = low_pass(accelerometer_table['Rot Y'], 0.99)
         accelerometer_table['Rot Z'] = low_pass(accelerometer_table['Rot Z'], 0.99)
@@ -54,6 +68,7 @@ def compute_data(csv_file_name):
 
     # Remove bias
     if rotation_bias_processing:
+        logging.info("Removing bias")
         accelerometer_table['Rotation X'] = remove_bias(accelerometer_table['Rotation X'])
         accelerometer_table['Rotation Y'] = remove_bias(accelerometer_table['Rotation Y'])
         accelerometer_table['Rotation Z'] = remove_bias(accelerometer_table['Rotation Z'])
@@ -84,13 +99,18 @@ def compute_data(csv_file_name):
     # Display graph
     graph = accelerometer_table.plot()
     graph.show()
-    graph.write_html(csv_file_name.split('.')[0] + '.html')
+    html_file_name = csv_file_name.split('.')[0] + '.html'
+    graph.write_html(html_file_name)
+    logging.info("Html file generated: " + html_file_name)
 
     # Generate json file
-    accelerometer_table.filter(['Rotation X', 'Rotation Y', 'Rotation Z'], axis=1).reset_index().to_json(csv_file_name.split('.')[0] + '.json', orient='records', indent=2)
-
+    json_file_name = csv_file_name.split('.')[0] + '.json'
+    accelerometer_table.filter(['Rotation X', 'Rotation Y', 'Rotation Z'], axis=1).reset_index().to_json(json_file_name, orient='records', indent=2)
+    logging.info("Json file generated: " + json_file_name)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
     csv_file_name = sys.argv[1]
 
     compute_data(csv_file_name)

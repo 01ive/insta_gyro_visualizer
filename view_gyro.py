@@ -26,6 +26,8 @@ def extract_info_from_video_file(video_file_name):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
     if len(sys.argv) > 1:
         video_file_name = sys.argv[1]
     else:
