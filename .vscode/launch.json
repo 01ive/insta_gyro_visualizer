@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Edge",
+            "name": "Js: Run client 3D",
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:5173",
@@ -16,7 +16,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "convert_to_csv.py",
-            "args": ["VID_20240530_173115_003.txt"],
+            "args": ["tests//VID_20240530_173115_003.txt"],
             "console": "integratedTerminal"
         },
         {
@@ -24,7 +24,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "compute_data.py",
-            "args": ["VID_20240530_173115_003.csv"],
+            "args": ["tests//VID_20240530_173115_003.csv"],
             "console": "integratedTerminal"
         },
         {
@@ -33,13 +33,6 @@
             "request": "launch",
             "program": "view_gyro.py",
             "args": ["tests//VID_20240530_173115_003.insv"],
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Py: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
             "console": "integratedTerminal"
         }
     ]

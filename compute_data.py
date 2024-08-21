@@ -7,6 +7,8 @@ pd.options.plotting.backend = "plotly"
 
 process_accelerometer_data = False
 
+rotation_low_pass = True
+rotation_bias_processing = True
 
 ''' Functions '''
 def low_pass(data, filter):
@@ -15,7 +17,7 @@ def low_pass(data, filter):
     return data
 
 def remove_bias(data):
-    bias_filter = np.pi / 24
+    bias_filter = np.pi / 13
     medium_last = data[0]
     bias = 0
     for i in range(1, len(data)):
@@ -37,27 +39,29 @@ def compute_data(csv_file_name):
     accelerometer_table['Time delta'] = accelerometer_table['Time delta'].shift(-1, fill_value=0)
 
     # Low pass filter on Rotation sensor
-    accelerometer_table['Rot X'] = low_pass(accelerometer_table['Rot X'], 0.99)
-    accelerometer_table['Rot Y'] = low_pass(accelerometer_table['Rot Y'], 0.99)
-    accelerometer_table['Rot Z'] = low_pass(accelerometer_table['Rot Z'], 0.99)
+    if rotation_low_pass:
+        accelerometer_table['Rot X'] = low_pass(accelerometer_table['Rot X'], 0.99)
+        accelerometer_table['Rot Y'] = low_pass(accelerometer_table['Rot Y'], 0.99)
+        accelerometer_table['Rot Z'] = low_pass(accelerometer_table['Rot Z'], 0.99)
 
     # Calulate rotation from rotation speed sensor
-    accelerometer_table['Rotation X'] = accelerometer_table['Rot X'] * accelerometer_table['Time delta'] # * 180 / np.pi
-    accelerometer_table['Rotation Y'] = accelerometer_table['Rot Y'] * accelerometer_table['Time delta'] # * 180 / np.pi
-    accelerometer_table['Rotation Z'] = accelerometer_table['Rot Z'] * accelerometer_table['Time delta'] # * 180 / np.pi
+    accelerometer_table['Rotation X'] = accelerometer_table['Rot X'] * accelerometer_table['Time delta']
+    accelerometer_table['Rotation Y'] = accelerometer_table['Rot Y'] * accelerometer_table['Time delta']
+    accelerometer_table['Rotation Z'] = accelerometer_table['Rot Z'] * accelerometer_table['Time delta']
     accelerometer_table['Rotation X'] = accelerometer_table['Rotation X'].cumsum()
     accelerometer_table['Rotation Y'] = accelerometer_table['Rotation Y'].cumsum()
     accelerometer_table['Rotation Z'] = accelerometer_table['Rotation Z'].cumsum()
 
     # Remove bias
-    accelerometer_table['Rotation X'] = remove_bias(accelerometer_table['Rotation X'])
-    accelerometer_table['Rotation Y'] = remove_bias(accelerometer_table['Rotation Y'])
-    accelerometer_table['Rotation Z'] = remove_bias(accelerometer_table['Rotation Z'])
+    if rotation_bias_processing:
+        accelerometer_table['Rotation X'] = remove_bias(accelerometer_table['Rotation X'])
+        accelerometer_table['Rotation Y'] = remove_bias(accelerometer_table['Rotation Y'])
+        accelerometer_table['Rotation Z'] = remove_bias(accelerometer_table['Rotation Z'])
 
     # Rotation angle in radians between -pi and pi
-    accelerometer_table['Rotation X angle'] = accelerometer_table['Rotation X'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
-    accelerometer_table['Rotation Y angle'] = accelerometer_table['Rotation Y'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
-    accelerometer_table['Rotation Z angle'] = accelerometer_table['Rotation Z'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
+    # accelerometer_table['Rotation X angle'] = accelerometer_table['Rotation X'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
+    # accelerometer_table['Rotation Y angle'] = accelerometer_table['Rotation Y'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
+    # accelerometer_table['Rotation Z angle'] = accelerometer_table['Rotation Z'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
 
     if process_accelerometer_data:
         # Calculate rotation angle from accelerator sensor
