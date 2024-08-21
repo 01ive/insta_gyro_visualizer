@@ -28,6 +28,39 @@
 			"height": 0.1,
 			"widthSegments": 1,
 			"heightSegments": 1
+		},
+		{
+			"uuid": "1b4b9ced-15ca-4c00-aae7-dc821d46e075",
+			"type": "CylinderGeometry",
+			"radiusTop": 0,
+			"radiusBottom": 0.1,
+			"height": 0.5,
+			"radialSegments": 32,
+			"heightSegments": 1,
+			"openEnded": false,
+			"thetaStart": 0,
+			"thetaLength": 6.283185307179586
+		},
+		{
+			"uuid": "1533a676-17bb-400a-bd88-6217856c9f93",
+			"type": "SphereGeometry",
+			"radius": 0.1,
+			"widthSegments": 32,
+			"heightSegments": 16,
+			"phiStart": 0,
+			"phiLength": 6.283185307179586,
+			"thetaStart": 0,
+			"thetaLength": 3.141592653589793
+		},
+		{
+			"uuid": "b97920ac-f963-4071-96c0-efe7a7be8673",
+			"type": "BoxGeometry",
+			"width": 0.3,
+			"height": 0.1,
+			"depth": 0.2,
+			"widthSegments": 1,
+			"heightSegments": 1,
+			"depthSegments": 1
 		}],
 	"materials": [
 		{
@@ -89,9 +122,39 @@
 			"reflectivity": 1,
 			"refractionRatio": 0.98,
 			"blendColor": 0
+		},
+		{
+			"uuid": "e4edd02d-1180-4cc8-a061-bdab37d8c4ed",
+			"type": "MeshBasicMaterial",
+			"color": 16744448,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		},
+		{
+			"uuid": "0bd495dd-b6e8-4dfd-a67d-9114c0fe0376",
+			"type": "MeshBasicMaterial",
+			"color": 16744640,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		},
+		{
+			"uuid": "5dacbf37-1f76-43e1-a8d6-3bb9d1fca0c8",
+			"type": "MeshBasicMaterial",
+			"color": 255,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
 		}],
 	"object": {
-		"uuid": "3f32564a-16f7-4444-bd66-a3562385c885",
+		"uuid": "8ce1c9ba-42f9-428d-b706-e08ace46ec9d",
 		"type": "Group",
 		"name": "paragliding",
 		"layers": 1,
@@ -99,64 +162,112 @@
 		"up": [0,1,0],
 		"children": [
 			{
-				"uuid": "bcff8d25-9ece-467d-8313-fa7a73f80aac",
-				"type": "Mesh",
-				"name": "extrado",
+				"uuid": "3f32564a-16f7-4444-bd66-a3562385c885",
+				"type": "Group",
+				"name": "para",
 				"layers": 1,
-				"matrix": [-1,-1.2246467991473532e-16,-6.162975822039155e-32,0,0,-4.440892098500626e-16,1,0,-1.224646799147353e-16,1,4.440892098500626e-16,0,0,0.1,-0.00018815479469322383,1],
+				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0.506,0,0,1],
 				"up": [0,1,0],
-				"geometry": "5da51606-cc37-4ec8-a723-9a93ff81fdc2",
-				"material": "04837698-60ef-41e2-b1c4-ffc80f88bd16"
+				"children": [
+					{
+						"uuid": "bcff8d25-9ece-467d-8313-fa7a73f80aac",
+						"type": "Mesh",
+						"name": "extrado",
+						"layers": 1,
+						"matrix": [-2.220446049250313e-16,0,-1.0000000000000002,0,0,1,0,0,1.0000000000000002,0,-2.220446049250313e-16,0,0.1,0,-0.00018815479469322383,1],
+						"up": [0,1,0],
+						"geometry": "5da51606-cc37-4ec8-a723-9a93ff81fdc2",
+						"material": "04837698-60ef-41e2-b1c4-ffc80f88bd16"
+					},
+					{
+						"uuid": "be0d7cd5-2bd8-4256-a9ad-686137443739",
+						"type": "Mesh",
+						"name": "intrado",
+						"layers": 1,
+						"matrix": [-2.220446049250313e-16,0,1.0000000000000002,0,0,1.0000000000000002,0,0,-1.0000000000000004,0,-2.2204460492503136e-16,0,0,0,-0.00018815479469322383,1],
+						"up": [0,1,0],
+						"geometry": "5da51606-cc37-4ec8-a723-9a93ff81fdc2",
+						"material": "5b1fc564-03d9-4740-95d4-3331b5506c72"
+					},
+					{
+						"uuid": "b9630c14-f114-446d-8519-f47392062b7e",
+						"type": "Mesh",
+						"name": "stabilo_g",
+						"layers": 1,
+						"matrix": [-2.2204460492503136e-16,-1.0000000000000004,1.2246467991473537e-16,0,-1.0000000000000002,-2.220446049250313e-16,0,0,0,-1.2246467991473537e-16,-1.0000000000000007,0,0.05,0,-1,1],
+						"up": [0,1,0],
+						"geometry": "8f7d10b2-75a1-4ffe-96b8-cd95b3685fc0",
+						"material": "70304f5d-f3bf-4832-ad6c-7b30269f4c26"
+					},
+					{
+						"uuid": "8bb3edd4-04b6-46fc-ac56-005cbbb7e252",
+						"type": "Mesh",
+						"name": "stabilo_d",
+						"layers": 1,
+						"matrix": [-2.2204460492503136e-16,1.0000000000000004,0,0,-1.0000000000000002,-2.220446049250313e-16,0,0,0,0,1.0000000000000002,0,0.05,0,1,1],
+						"up": [0,1,0],
+						"geometry": "8f7d10b2-75a1-4ffe-96b8-cd95b3685fc0",
+						"material": "8b095d83-a993-4911-b94f-0838aef3d7d3"
+					},
+					{
+						"uuid": "07380b91-827a-42f0-a05a-645b44bcda2b",
+						"type": "Mesh",
+						"name": "bord_attaque",
+						"layers": 1,
+						"matrix": [-4.440892098500626e-16,0,1.0000000000000004,0,-1.0000000000000004,-4.440892098500626e-16,0,0,0,-1.0000000000000004,-4.440892098500626e-16,0,0.05,-0.25,0,1],
+						"up": [0,1,0],
+						"geometry": "5d131a17-1d31-4e82-80a7-7b1b89abde07",
+						"material": "cd21e3f9-65f0-471e-a12d-7703ba138e94"
+					},
+					{
+						"uuid": "1338e343-8272-482c-8c53-4b72b6a23c0b",
+						"type": "Mesh",
+						"name": "bord_fuite",
+						"layers": 1,
+						"matrix": [-4.440892098500626e-16,0,-1.0000000000000004,0,-1.0000000000000004,-4.440892098500626e-16,0,0,0,1.0000000000000004,-4.440892098500626e-16,0,0.05,0.25,-0.0007486665749185106,1],
+						"up": [0,1,0],
+						"geometry": "5d131a17-1d31-4e82-80a7-7b1b89abde07",
+						"material": "cd9486de-d9c0-4d29-98fb-30123befa2e1"
+					}]
 			},
 			{
-				"uuid": "be0d7cd5-2bd8-4256-a9ad-686137443739",
-				"type": "Mesh",
-				"name": "intrado",
+				"uuid": "6e03a475-6cb7-4d3f-9dd9-6791df2a199e",
+				"type": "Group",
+				"name": "pilot",
 				"layers": 1,
-				"matrix": [1,0,0,0,0,-2.220446049250313e-16,1.0000000000000002,0,0,-1.0000000000000002,-2.220446049250313e-16,0,0,0,-0.00018815479469322383,1],
+				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,-0.5,0,0,1],
 				"up": [0,1,0],
-				"geometry": "5da51606-cc37-4ec8-a723-9a93ff81fdc2",
-				"material": "5b1fc564-03d9-4740-95d4-3331b5506c72"
-			},
-			{
-				"uuid": "b9630c14-f114-446d-8519-f47392062b7e",
-				"type": "Mesh",
-				"name": "stabilo_g",
-				"layers": 1,
-				"matrix": [-2.220446049250313e-16,0,-1.0000000000000002,0,0,1,0,0,1.0000000000000002,0,-2.220446049250313e-16,0,1,0.05,0,1],
-				"up": [0,1,0],
-				"geometry": "8f7d10b2-75a1-4ffe-96b8-cd95b3685fc0",
-				"material": "70304f5d-f3bf-4832-ad6c-7b30269f4c26"
-			},
-			{
-				"uuid": "8bb3edd4-04b6-46fc-ac56-005cbbb7e252",
-				"type": "Mesh",
-				"name": "stabilo_d",
-				"layers": 1,
-				"matrix": [-2.220446049250313e-16,0,1.0000000000000002,0,0,1,0,0,-1.0000000000000002,0,-2.220446049250313e-16,0,-1,0.05,0.00115713464876116,1],
-				"up": [0,1,0],
-				"geometry": "8f7d10b2-75a1-4ffe-96b8-cd95b3685fc0",
-				"material": "8b095d83-a993-4911-b94f-0838aef3d7d3"
-			},
-			{
-				"uuid": "07380b91-827a-42f0-a05a-645b44bcda2b",
-				"type": "Mesh",
-				"name": "bord_attaque",
-				"layers": 1,
-				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0.05,0.24651745512474132,1],
-				"up": [0,1,0],
-				"geometry": "5d131a17-1d31-4e82-80a7-7b1b89abde07",
-				"material": "cd21e3f9-65f0-471e-a12d-7703ba138e94"
-			},
-			{
-				"uuid": "1338e343-8272-482c-8c53-4b72b6a23c0b",
-				"type": "Mesh",
-				"name": "bord_fuite",
-				"layers": 1,
-				"matrix": [1,0,0,0,0,-1,-1.2246467991473532e-16,0,0,1.2246467991473532e-16,-1,0,0,0.05,-0.25,1],
-				"up": [0,1,0],
-				"geometry": "5d131a17-1d31-4e82-80a7-7b1b89abde07",
-				"material": "cd9486de-d9c0-4d29-98fb-30123befa2e1"
+				"children": [
+					{
+						"uuid": "65d62060-cf2c-49cd-a5f2-de563cdc52af",
+						"type": "Mesh",
+						"name": "body",
+						"layers": 1,
+						"matrix": [-2.220446049250313e-16,-1.0000000000000002,0,0,1.0000000000000002,-2.220446049250313e-16,0,0,0,0,1,0,0,0,0,1],
+						"up": [0,1,0],
+						"geometry": "1b4b9ced-15ca-4c00-aae7-dc821d46e075",
+						"material": "e4edd02d-1180-4cc8-a061-bdab37d8c4ed"
+					},
+					{
+						"uuid": "7949edc1-3014-4ba4-ae4f-a61d1e8700a0",
+						"type": "Mesh",
+						"name": "head",
+						"layers": 1,
+						"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0.1500640322628467,0,0,1],
+						"up": [0,1,0],
+						"geometry": "1533a676-17bb-400a-bd88-6217856c9f93",
+						"material": "0bd495dd-b6e8-4dfd-a67d-9114c0fe0376"
+					},
+					{
+						"uuid": "9431131c-f6b8-4fce-88e9-118a4a11543e",
+						"type": "Mesh",
+						"name": "backpack",
+						"layers": 1,
+						"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,-0.08963497547463162,0.07883854519744204,0,1],
+						"up": [0,1,0],
+						"geometry": "b97920ac-f963-4071-96c0-efe7a7be8673",
+						"material": "5dacbf37-1f76-43e1-a8d6-3bb9d1fca0c8"
+					}]
 			}]
 	}
 }
