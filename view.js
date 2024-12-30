@@ -75,9 +75,9 @@ function render() {
                       " | roulis: " + roulis.toFixed(0).toString() + "°" +
                       " | lacet: " + lacet.toFixed(0).toString() + "°";
     // Rotate object
-    cube.rotation.x = sensor_data[index]['Rotation X'];
-    cube.rotation.y = sensor_data[index]['Rotation Y'];
-    cube.rotation.z = sensor_data[index]['Rotation Z'];
+    cube.rotation.x = sensor_data[index]['Rotation X'] - reset_offset.x;
+    cube.rotation.y = sensor_data[index]['Rotation Y'] - reset_offset.y;
+    cube.rotation.z = sensor_data[index]['Rotation Z'] - reset_offset.z;
   }
 
   // Render the scene
