@@ -31,7 +31,7 @@ const loader = new THREE.ObjectLoader();
 
 loader.load(
 	// resource URL
-	"paragliding.json",
+	"insta.json",
 
 	// onLoad callback
 	// Here the loaded data is assumed to be an object
@@ -56,6 +56,7 @@ const axesHelper = new THREE.AxesHelper(5);
 scene.add( axesHelper );
 
 var index = 0;
+var reset_quaternion = new THREE.Quaternion().fromArray(reset_offset);
 
 // Render Loop
 function render() {
@@ -65,19 +66,21 @@ function render() {
     // Get cursor position
     index = document.getElementById('time').valueAsNumber;
 
-    let assiette = - sensor_data[index]['Rotation Z'] * 180 / Math.PI;
-    let roulis = - sensor_data[index]['Rotation Y'] * 180 / Math.PI;
-    let lacet = sensor_data[index]['Rotation X'] * 180 / Math.PI;
+    reset_quaternion.fromArray(reset_offset);
+
+     // Update object position
+    cube.quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
+    cube.quaternion.multiply(reset_quaternion.invert());
+
+    let lacet = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 0, 1)) * 180 / Math.PI;
+    let assiette = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 1, 0)) * 180 / Math.PI;
+    let roulis = cube.quaternion.angleTo(new THREE.Quaternion(0, 1, 0, 0)) * 180 / Math.PI;
 
     // Print debug text
     value.innerHTML = index.toString() + " / " + sensor_data.length.toString() + 
                       " | assiette: " + assiette.toFixed(0).toString() + "°" +
                       " | roulis: " + roulis.toFixed(0).toString() + "°" +
                       " | lacet: " + lacet.toFixed(0).toString() + "°";
-    // Rotate object
-    cube.rotation.x = sensor_data[index]['Rotation X'] - reset_offset.x;
-    cube.rotation.y = sensor_data[index]['Rotation Y'] - reset_offset.y;
-    cube.rotation.z = sensor_data[index]['Rotation Z'] - reset_offset.z;
   }
 
   // Render the scene

@@ -46,7 +46,7 @@
   <script type="module" src="view.js"></script>
   <script>
     var sensor_data = [];
-    var reset_offset = {x: 0, y: 0, z: 0};
+    var reset_offset = [0, 0, 0, 1]; // x, y, z, w
 
     // Load file button
     const fileSelector = document.getElementById('file-selector');
@@ -63,12 +63,12 @@
 
     function reset_position() {
       let index = document.getElementById('time').valueAsNumber;
-      reset_offset = {x: sensor_data[index]['Rotation X'], y: sensor_data[index]['Rotation Y'], z: sensor_data[index]['Rotation Z']};
+      reset_offset = [sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']];
     }
 
     function read_file(file) {
       sensor_data = JSON.parse(file);
-      document.getElementById('time').max = sensor_data.length.toString();
+      document.getElementById('time').max = (sensor_data.length-1).toString();
     }    
   </script>
 </body>
