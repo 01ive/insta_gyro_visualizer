@@ -31,7 +31,7 @@ const loader = new THREE.ObjectLoader();
 
 loader.load(
 	// resource URL
-	"3D_models/insta.json",
+	"3D_models/paragliding.json",
 
 	// onLoad callback
 	// Here the loaded data is assumed to be an object

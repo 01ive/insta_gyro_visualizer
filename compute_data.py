@@ -91,7 +91,7 @@ def compute_data(accelerometer_table):
     
     return accelerometer_table
 
-def save_file(accelerometer_table, json_file_name):
+def save_file(accelerometer_table, json_file_name, display_graph=False):
     logging.info("Save data to file: " + json_file_name)
     
     # Use time col as index
@@ -99,7 +99,7 @@ def save_file(accelerometer_table, json_file_name):
 
     # Display graph
     graph = accelerometer_table.plot()
-    graph.show()
+    if display_graph: graph.show()
     html_file_name = json_file_name.split('.')[0] + '.html'
     graph.write_html(html_file_name)
     logging.info("Html file generated: " + html_file_name)
@@ -120,5 +120,5 @@ if __name__ == "__main__":
     result = compute_data(data)
 
     json_file_name = json_file_name.split('.')[0] + '_compute.json'
-    save_file(result, json_file_name)
+    save_file(result, json_file_name, True)
 
