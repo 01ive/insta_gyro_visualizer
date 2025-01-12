@@ -6,6 +6,8 @@ import numpy as np
 import logging
 import json
 
+from progress.bar import Bar
+
 import quaternion
 
 pd.options.plotting.backend = "plotly"
@@ -37,10 +39,13 @@ def read_json_file(json_file_name):
 
     # Convert to pandas dataframe
     logging.info("Convert to pandas dataframe")
+    progress_bar = Bar("Processing data", max=len(data_from_video))
     data_from_video_table = pd.DataFrame(columns=data_from_video[list(data_from_video.keys())[0]].keys())
     for item in data_from_video:
         data_from_video_table.loc[item] = data_from_video[item]
-    
+        progress_bar.next()
+    progress_bar.finish()
+
     logging.info("Generate columns")
     accelerometer_table = pd.DataFrame()
     accelerometer_table['Time'] = data_from_video_table['TimeCode'].apply(lambda x: float(x))
@@ -63,7 +68,7 @@ def compute_data(accelerometer_table):
     accelerometer_table['Time delta'] = accelerometer_table['Time'] - accelerometer_table['Time'].shift(fill_value=0)
 
     q = np.array([1, 0, 0, 0])  # Quaternion initial
-
+    progress_bar = Bar("Processing data", max=len(accelerometer_table.index))
     for index in accelerometer_table.index:
         # Mise à jour avec le gyroscope
         gyro_data = np.array([accelerometer_table['Rot X'][index], accelerometer_table['Rot Y'][index], accelerometer_table['Rot Z'][index]])
@@ -73,7 +78,11 @@ def compute_data(accelerometer_table):
         accelerometer_table.loc[index, 'x'] = q[1]
         accelerometer_table.loc[index, 'y'] = q[2]
         accelerometer_table.loc[index, 'z'] = q[3]
+        progress_bar.next()
 
+    progress_bar.finish()
+
+    # Generate position from in Euler format
     accelerometer_table['Euler'] = accelerometer_table.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['w'], x['x'], x['y'], x['z']])), axis=1)
     accelerometer_table['Roll'] = accelerometer_table.apply(lambda x: x['Euler'][0], axis=1)
     accelerometer_table['Pich'] = accelerometer_table.apply(lambda x: x['Euler'][1], axis=1)
