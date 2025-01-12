@@ -24,7 +24,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "compute_data.py",
-            "args": ["tests//VID_20240530_173115_003.csv"],
+            "args": ["tests//VID_20240530_173115_003.json"],
             "console": "integratedTerminal"
         },
         {

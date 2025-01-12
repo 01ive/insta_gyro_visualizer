@@ -5,8 +5,8 @@
 Using *exiftool* command line with options
 
 * **-m** ignore Minor Errors
-* **-g** Organize output by tag group
-* **-S** Very short output format
+* **-g3** Organize output by tag group
+* **-j** Json output format
 * **-ee** Extract information from embedded documents
 * **-api** largefilesupport
 
@@ -15,7 +15,7 @@ Using *exiftool* command line with options
 Exemple
 
 ```bash
-exiftool -m -TimeCode -Accelerometer -AngularVelocity -g -api largefilesupport -S -ee VID_20240530_173115_003.insv | tee VID_20240530_173115_003.txt
+exiftool -m -api largefilesupport=1 -g3 -j -ee -TimeCode -Accelerometer -AngularVelocity VID_20240530_173115_003.insv | tee tests/VID_20240530_173115_003.json
 ```
 
 ## Convert text to csv data

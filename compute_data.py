@@ -1,182 +1,109 @@
 import sys
+import os
 import pandas as pd
 import plotly.express as px
 import numpy as np
 import logging
+import json
 
-from progress.bar import Bar
+import quaternion
 
 pd.options.plotting.backend = "plotly"
 
-process_accelerometer_data = False
-
-rotation_low_pass = False
-acceleration_low_pass = False
-rotation_bias_processing = False
-
-Kalman_filter_processing = False
 
 ''' Functions '''
-def low_pass(data, filter):
-    progress_bar = Bar("Low pass " + data.name, max=len(data))
-    for i in range(1, len(data)):
-        data[i] = filter*data[i-1] + (1-filter)*data[i]
-        progress_bar.next()
-    progress_bar.finish()
-    return data
+def read_json_file(json_file_name):
+    logging.info("Start computing data from file: " + json_file_name)
 
-def remove_bias(data):
-    bias_filter = np.pi / 13
-    medium_last = data[0]
-    bias = 0
+    # Generate csv file
+    csv_file_name = json_file_name.split('.')[0] + '.csv'
 
-    progress_bar = Bar("Remove bias " + data.name, max=len(data))
+    if os.path.exists(csv_file_name):
+        logging.info("CSV file already exists: " + csv_file_name)
+        accelerometer_table = pd.read_csv(csv_file_name, sep='\t', index_col=0)
+        return accelerometer_table
 
-    for i in range(1, len(data)):
-        if(np.abs(data[i] - medium_last) < bias_filter):
-            bias = np.abs(medium_last)
-            medium_last = 0.99*medium_last + 0.01*data[i]
-        else:
-            pass
-        data[i] = data[i] - np.sign(data[i]) * bias
-        progress_bar.next()
+    logging.info("CSV file not found, generating it")
+    with open(json_file_name) as f:
+        data_from_video = json.load(f)
     
-    progress_bar.finish()
-    return data
+    # Remove unused data
+    logging.info("Remove unused data")
+    data_from_video = data_from_video[0]
+    key = list(data_from_video.keys()).copy()
+    for item in key:
+        if (len(data_from_video[item]) == 1) or item == 'SourceFile':
+            del(data_from_video[item])
 
-def Kalman_filter(data):
-    # Initialisation des variables
-    theta_est = 0.0  # Angle estimé initial
-    P = 1.0  # Covariance initiale
-    Q = 0.001  # Bruit du processus (modèle dynamique)
-    R = 0.1   # Bruit de mesure (capteur)
+    # Convert to pandas dataframe
+    logging.info("Convert to pandas dataframe")
+    data_from_video_table = pd.DataFrame(columns=data_from_video[list(data_from_video.keys())[0]].keys())
+    for item in data_from_video:
+        data_from_video_table.loc[item] = data_from_video[item]
+    
+    logging.info("Generate columns")
+    accelerometer_table = pd.DataFrame()
+    accelerometer_table['Time'] = data_from_video_table['TimeCode'].apply(lambda x: float(x))
+    accelerometer_table['Acc X'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[0]))
+    accelerometer_table['Acc Y'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[1]))
+    accelerometer_table['Acc Z'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[2]))
+    accelerometer_table['Rot X'] = data_from_video_table['AngularVelocity'].apply(lambda x: float(x.split(' ')[0]))
+    accelerometer_table['Rot Y'] = data_from_video_table['AngularVelocity'].apply(lambda x: float(x.split(' ')[1]))
+    accelerometer_table['Rot Z'] = data_from_video_table['AngularVelocity'].apply(lambda x: float(x.split(' ')[2]))
 
-    accel_data = data['ACC rotation Y angle 2D']
-    gyro_data = data['Rot Y']
-    dt = data['Time delta']
-    data['Kalman filter Y'] = 0.0
+    # Generate csv file
+    accelerometer_table.reset_index().filter(['Time', 'Acc X', 'Acc Y', 'Acc Z', 'Rot X', 'Rot Y', 'Rot Z'], axis=1).to_csv(csv_file_name, sep='\t')
+    logging.info("CSV file generated: " + csv_file_name)
 
-    # Filtre de Kalman
-    for i in data.index:
-        # Étape de prédiction
-        theta_pred = theta_est + gyro_data[i] * dt[i]
-        P_pred = P + Q
-        
-        # Calcul du gain de Kalman
-        K = P_pred / (P_pred + R)
-        
-        # Mise à jour de l'estimation
-        theta_est = theta_pred + K * (accel_data[i] - theta_pred)
-        P = (1 - K) * P_pred
+    return accelerometer_table
 
-        data.loc[i, 'Kalman filter Y'] = theta_est
-
-    return data
-
-
-def compute_data(csv_file_name):
-    logging.info("Start computing data from file: " + csv_file_name)
-
-    accelerometer_table = pd.read_csv(csv_file_name, sep='\t', index_col=0)
-
+def compute_data(accelerometer_table):
     # Calculate time starting to 0
     accelerometer_table['Time'] = accelerometer_table['Time'].apply(lambda x: x-accelerometer_table['Time'][0])
     accelerometer_table['Time delta'] = accelerometer_table['Time'] - accelerometer_table['Time'].shift(fill_value=0)
 
-    if acceleration_low_pass:
-        logging.info("Low pass filter calculation")
-        accelerometer_table['Acc X'] = low_pass(accelerometer_table['Acc X'], 0.99)
-        accelerometer_table['Acc Y'] = low_pass(accelerometer_table['Acc Y'], 0.99)
-        accelerometer_table['Acc Z'] = low_pass(accelerometer_table['Acc Z'], 0.99)
+    q = np.array([1, 0, 0, 0])  # Quaternion initial
 
-    # Low pass filter on Rotation sensor
-    if rotation_low_pass:
-        logging.info("Low pass filter calculation")
-        accelerometer_table['Rot X'] = low_pass(accelerometer_table['Rot X'], 0.99)
-        accelerometer_table['Rot Y'] = low_pass(accelerometer_table['Rot Y'], 0.99)
-        accelerometer_table['Rot Z'] = low_pass(accelerometer_table['Rot Z'], 0.99)
+    for index in accelerometer_table.index:
+        # Mise à jour avec le gyroscope
+        gyro_data = np.array([accelerometer_table['Rot X'][index], accelerometer_table['Rot Y'][index], accelerometer_table['Rot Z'][index]])
+        q = quaternion.update_quaternion_with_gyro(q, gyro_data, accelerometer_table['Time delta'][index])
 
-    # Calulate rotation from rotation speed sensor
-    accelerometer_table['Rotation X'] = accelerometer_table['Rot X'] * accelerometer_table['Time delta']
-    accelerometer_table['Rotation Y'] = accelerometer_table['Rot Y'] * accelerometer_table['Time delta']
-    accelerometer_table['Rotation Z'] = accelerometer_table['Rot Z'] * accelerometer_table['Time delta']
+        accelerometer_table.loc[index, 'w'] = q[0]
+        accelerometer_table.loc[index, 'x'] = q[1]
+        accelerometer_table.loc[index, 'y'] = q[2]
+        accelerometer_table.loc[index, 'z'] = q[3]
 
-    # accelerometer_table['Rotation X'] = accelerometer_table['Rotation X'].apply(lambda x: 0 if np.abs(x) <= 0.001 else x)
-    # accelerometer_table['Rotation Y'] = accelerometer_table['Rotation Y'].apply(lambda x: 0 if np.abs(x) <= 0.001 else x)
-    # accelerometer_table['Rotation Z'] = accelerometer_table['Rotation Z'].apply(lambda x: 0 if np.abs(x) <= 0.001 else x)
+    return accelerometer_table
 
-
-    # window = 10
-    # level = 0.001
-    # accelerometer_table['Rotation X filtered'] = accelerometer_table['Rotation X'].rolling(window=window, min_periods=1).mean()
-    # accelerometer_table['Rotation X filtered'] = np.abs(accelerometer_table['Rotation X filtered']) > level 
-    # accelerometer_table['Rotation X filtered'] = accelerometer_table['Rotation X'] * accelerometer_table['Rotation X filtered']
-    # accelerometer_table['Rotation X'] = accelerometer_table['Rotation X filtered'].cumsum()
-
-    # accelerometer_table['Rotation Y filtered'] = accelerometer_table['Rotation Y'].rolling(window=window, min_periods=1).mean()
-    # accelerometer_table['Rotation Y filtered'] = np.abs(accelerometer_table['Rotation Y filtered']) > level 
-    # accelerometer_table['Rotation Y filtered'] = accelerometer_table['Rotation Y'] * accelerometer_table['Rotation Y filtered']
-    # accelerometer_table['Rotation Y'] = accelerometer_table['Rotation Y filtered'].cumsum()
-
-    # accelerometer_table['Rotation Z filtered'] = accelerometer_table['Rotation Z'].rolling(window=window, min_periods=1).mean()
-    # accelerometer_table['Rotation Z filtered'] = np.abs(accelerometer_table['Rotation Z filtered']) > level 
-    # accelerometer_table['Rotation Z filtered'] = accelerometer_table['Rotation Z'] * accelerometer_table['Rotation Z filtered']
-    # accelerometer_table['Rotation Z'] = accelerometer_table['Rotation Z filtered'].cumsum()
-
-    accelerometer_table['Rotation X'] = accelerometer_table['Rotation X'].cumsum()
-    accelerometer_table['Rotation Y'] = accelerometer_table['Rotation Y'].cumsum()
-    accelerometer_table['Rotation Z'] = accelerometer_table['Rotation Z'].cumsum()
-
-    # Remove bias
-    if rotation_bias_processing:
-        logging.info("Removing bias")
-        remove_bias(accelerometer_table['Rotation X'])
-        remove_bias(accelerometer_table['Rotation Y'])
-        remove_bias(accelerometer_table['Rotation Z'])
-
-    # Rotation angle in radians between -pi and pi
-    accelerometer_table['Rotation X angle'] = accelerometer_table['Rotation X'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
-    accelerometer_table['Rotation Y angle'] = accelerometer_table['Rotation Y'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
-    accelerometer_table['Rotation Z angle'] = accelerometer_table['Rotation Z'].apply(lambda x: x if np.abs(x) <= np.pi else x - np.sign(x) * 2*np.pi)
-
-    if process_accelerometer_data:
-        # Calculate rotation angle from accelerator sensor
-        accelerometer_table['ACC rotation X angle 2D'] = np.arctan2(accelerometer_table['Acc Y'], accelerometer_table['Acc Z'])
-        accelerometer_table['ACC rotation Y angle 2D'] = np.arctan2(accelerometer_table['Acc Z'], accelerometer_table['Acc X'])
-        accelerometer_table['ACC rotation Z angle 2D'] = np.arctan2(accelerometer_table['Acc X'], accelerometer_table['Acc Y'])
-
-        accelerometer_table['ACC rotation X angle 3D'] = np.arctan2(accelerometer_table['Acc X'], np.sqrt(
-                                            np.power(accelerometer_table['Acc Y'], 2) + 
-                                            np.power(accelerometer_table['Acc Z'], 2) )  )
-        accelerometer_table['ACC rotation Y angle 3D'] = np.arctan2(accelerometer_table['Acc Z'], np.sqrt(
-                                            np.power(accelerometer_table['Acc Y'], 2) + 
-                                            np.power(accelerometer_table['Acc X'], 2) )  )
-        accelerometer_table['ACC rotation Z angle 3D'] = np.arctan2(-accelerometer_table['Acc Y'], np.sqrt(
-                                            np.power(accelerometer_table['Acc X'], 2) + 
-                                            np.power(accelerometer_table['Acc Z'], 2) )  )
-
-    if Kalman_filter_processing:
-        logging.info("Kalman filter calculation")
-        accelerometer_table = Kalman_filter(accelerometer_table)
-
+def save_file(accelerometer_table, json_file_name):
+    logging.info("Save data to file: " + json_file_name)
+    
     # Use time col as index
     accelerometer_table = accelerometer_table.set_index('Time')
+
     # Display graph
     graph = accelerometer_table.plot()
     graph.show()
-    html_file_name = csv_file_name.split('.')[0] + '.html'
+    html_file_name = json_file_name.split('.')[0] + '.html'
     graph.write_html(html_file_name)
     logging.info("Html file generated: " + html_file_name)
 
     # Generate json file
-    json_file_name = csv_file_name.split('.')[0] + '.json'
-    accelerometer_table.filter(['Rotation X', 'Rotation Y', 'Rotation Z'], axis=1).reset_index().to_json(json_file_name, orient='records', indent=2)
+    json_file_name = json_file_name.split('.')[0] + '.json'
+    accelerometer_table.filter(['w', 'x', 'y', 'z'], axis=1).reset_index().to_json(json_file_name, orient='records', indent=2)
     logging.info("Json file generated: " + json_file_name)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
-    csv_file_name = sys.argv[1]
+    json_file_name = sys.argv[1]
 
-    compute_data(csv_file_name)
+    data = read_json_file(json_file_name)
+
+    result = compute_data(data)
+
+    json_file_name = json_file_name.split('.')[0] + '_compute.json'
+    save_file(result, json_file_name)
+
