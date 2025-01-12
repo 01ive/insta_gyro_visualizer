@@ -74,6 +74,12 @@ def compute_data(accelerometer_table):
         accelerometer_table.loc[index, 'y'] = q[2]
         accelerometer_table.loc[index, 'z'] = q[3]
 
+    accelerometer_table['Euler'] = accelerometer_table.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['w'], x['x'], x['y'], x['z']])), axis=1)
+    accelerometer_table['Roll'] = accelerometer_table.apply(lambda x: x['Euler'][0], axis=1)
+    accelerometer_table['Pich'] = accelerometer_table.apply(lambda x: x['Euler'][1], axis=1)
+    accelerometer_table['Yaw'] = accelerometer_table.apply(lambda x: x['Euler'][2], axis=1)
+    del(accelerometer_table['Euler'])
+    
     return accelerometer_table
 
 def save_file(accelerometer_table, json_file_name):
