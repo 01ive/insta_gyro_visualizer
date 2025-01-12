@@ -35,7 +35,8 @@
         <label for="time">Time</label>
     </div>
     <div>
-        <input type="button" id="reset" value="Reset" onclick="reset_position()" />
+        <input type="button" id="reset" value="Reset position" onclick="reset_position()" />
+        <input type="button" id="play" value="play" onclick="play()" />
     </div>
 
     <script>
@@ -48,6 +49,24 @@
             let index = document.getElementById('time').valueAsNumber;
             reset_quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
             reset_quaternion.invert();
+        }
+
+        // Play button
+        function play_period() {
+            if(index < sensor_data.length - 1) {
+                index++;
+                document.getElementById('time').valueAsNumber = index;
+            }
+        }
+        var play_time_period = 1;
+        var auto_play_timer = 0;
+        function play() {
+            if(auto_play_timer != 0) {
+                clearInterval(auto_play_timer);
+                auto_play_timer = 0;
+            } else {
+                auto_play_timer = setInterval(play_period, play_time_period);
+            }
         }
 
         function read_file(file) {
