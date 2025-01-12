@@ -8,15 +8,14 @@
             "name": "Js: Run client 3D",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}"
+            "url": "${workspaceFolder}\\index.html"
         },
         {
-            "name": "Py: convert_to_csv.py",
+            "name": "Py: convert_model_to_js.py",
             "type": "debugpy",
             "request": "launch",
-            "program": "convert_to_csv.py",
-            "args": ["tests//VID_20240530_173115_003.txt"],
+            "program": "model_to_js.py",
+            "args": ["3D_models//paragliding.json"],
             "console": "integratedTerminal"
         },
         {

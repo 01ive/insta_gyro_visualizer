@@ -3,6 +3,7 @@ import subprocess
 import logging
 
 import compute_data
+import model_to_js
 
 def extract_info_from_video_file(video_file_name):
     cmd = subprocess.run("wsl wslpath -a -u {}".format(video_file_name), capture_output=True, text=True, check=True) 
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     logging.info("Processing video file " + video_file_name)
     
     json_file = extract_info_from_video_file(video_file_name)
-    logging.info("text file generated: " + json_file)
+    logging.info("json file generated: " + json_file)
 
     data = compute_data.read_json_file(json_file)
 
@@ -43,5 +44,9 @@ if __name__ == "__main__":
 
     json_file = json_file.split('.')[0] + '_compute.json'
     compute_data.save_file(result, json_file)
+
+    logging.info("Generating 3D model")
+    model_file = "3D_models//paragliding.json"
+    model_to_js.model_to_js(model_file)
 
     logging.info("End of process")

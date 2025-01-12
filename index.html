@@ -1,76 +1,129 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Three.js 101</title>
-  <!--  Simple reset to delete the margins  -->
-  <style>
-    body {
-      margin: 0;
-    }
+    <meta charset="UTF-8" />
+    <title>Three.js 101</title>
+    <!--  Simple reset to delete the margins  -->
+    <style>
+        body {
+            margin: 0;
+        }
 
-    canvas {
-      width: 100%;
-      height: 100%
-    }
+        canvas {
+            width: 100%;
+            height: 100%
+        }
 
-    #time {
-      width: 90%
-    }
-  </style>
-  <!--  Three.js CDN  -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
-      }
-    }
-  </script>
+        #time {
+            width: 90%
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+    <script src="3D_models/paragliding.js"></script>
+    <script src="view.js"></script>
 </head>
 
 <body>
-  <div id="menu_button">
-    <label id="my-file-selector" for="file-selector"></label>
-    <input type="file" id="file-selector" accept=".json">
-  </div>
-  <div id="value">---- / ----</div>
-  <div>
-    <input type="range" id="time" name="time" min="0" max="1000" />
-    <label for="time">Time</label>
-  </div>
-  <div>
-    <input type="button" id="reset" value="Reset" onclick="reset_position()"/>
-  </div>
-  <!--  Our code  -->
-  <script type="module" src="view.js"></script>
-  <script>
-    var sensor_data = [];
-    var reset_offset = [0, 0, 0, 1]; // x, y, z, w
+    <div id="menu_button">
+        <label id="my-file-selector" for="file-selector"></label>
+        <input type="file" id="file-selector" accept=".json">
+    </div>
+    <div id="value">---- / ----</div>
+    <div>
+        <input type="range" id="time" name="time" min="0" max="1000" />
+        <label for="time">Time</label>
+    </div>
+    <div>
+        <input type="button" id="reset" value="Reset" onclick="reset_position()" />
+    </div>
 
-    // Load file button
-    const fileSelector = document.getElementById('file-selector');
-    let current_file;
-    fileSelector.addEventListener('change', (event) => {
-      const fileList = event.target.files;
-      const reader = new FileReader();
-      reader.addEventListener('load', (event) => {
-        current_file = event.target.result;
-        read_file(current_file);
-      });
-      reader.readAsText(fileList[0]);
-    });
+    <script>
+        var sensor_data = [];
+        var index = 0;
+        var reset_quaternion = new THREE.Quaternion().fromArray([0, 0, 0, 1]);
 
-    function reset_position() {
-      let index = document.getElementById('time').valueAsNumber;
-      reset_offset = [sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']];
-    }
+        // Action on reset button
+        function reset_position() {
+            let index = document.getElementById('time').valueAsNumber;
+            reset_quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
+            reset_quaternion.invert();
+        }
 
-    function read_file(file) {
-      sensor_data = JSON.parse(file);
-      document.getElementById('time').max = (sensor_data.length-1).toString();
-    }    
-  </script>
+        function read_file(file) {
+            sensor_data = JSON.parse(file);
+            document.getElementById('time').max = (sensor_data.length - 1).toString();
+        }
+
+        // Load file button
+        const fileSelector = document.getElementById('file-selector');
+        let current_file;
+        fileSelector.addEventListener('change', (event) => {
+            const fileList = event.target.files;
+            const reader = new FileReader();
+            reader.addEventListener('load', (event) => {
+                current_file = event.target.result;
+                read_file(current_file);
+            });
+            reader.readAsText(fileList[0]);
+        });
+        
+        // ------------------------------------------------
+        // ThreeJS
+        // ------------------------------------------------
+        // Create an empty scene
+        var scene = new THREE.Scene();
+
+        // Camera settings
+        var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.y = -5;
+        camera.rotation.x = Math.PI / 2;
+        camera.rotation.z = -Math.PI / 2;
+
+        // Create a renderer with Antialiasing
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor("#000000");
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create objects
+        const loader = new THREE.ObjectLoader();
+        
+        var cube;
+        cube = loader.parse(model_data);
+        scene.add(cube);
+
+        const axesHelper = new THREE.AxesHelper(5);
+        scene.add(axesHelper);
+
+        // Render Loop
+        function render() {
+            requestAnimationFrame(render);
+
+            if (sensor_data.length > 0) {
+                // Get cursor position
+                index = document.getElementById('time').valueAsNumber;
+
+                // Update object position
+                cube.quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
+                cube.quaternion.multiply(reset_quaternion);
+
+                let lacet = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 0, 1)) * 180 / Math.PI;
+                let assiette = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 1, 0)) * 180 / Math.PI;
+                let roulis = cube.quaternion.angleTo(new THREE.Quaternion(0, 1, 0, 0)) * 180 / Math.PI;
+
+                // Print debug text
+                value.innerHTML = index.toString() + " / " + sensor_data.length.toString() +
+                    " | assiette: " + assiette.toFixed(0).toString() + "°" +
+                    " | roulis: " + roulis.toFixed(0).toString() + "°" +
+                    " | lacet: " + lacet.toFixed(0).toString() + "°";
+            }
+
+            // Render the scene
+            renderer.render(scene, camera);
+        };
+
+        render();
+    </script>
 </body>
-
 </html>

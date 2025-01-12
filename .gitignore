@@ -3,3 +3,4 @@ tests
 real
 venv
 *.pyc
+3D_models/*.js
