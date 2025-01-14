@@ -25,6 +25,7 @@
 </head>
 
 <!-- HTML BODY -->
+
 <body>
     <div id="menu_button">
         <label id="my-file-selector" for="file-selector"></label>
@@ -32,7 +33,7 @@
     </div>
     <div id="value">---- / ----</div>
     <div>
-        <input type="range" id="time" name="time" min="0" max="1000" value="0"/>
+        <input type="range" id="time" name="time" min="0" max="1000" value="0" />
         <label for="time">Time</label>
     </div>
     <div>
@@ -45,13 +46,16 @@
     <script>
         var sensor_data = [];
         var index = 0;
-        var reset_quaternion = new THREE.Quaternion().fromArray([0, 0, 0, 1]);
+        var reset_quaternion = new THREE.Quaternion().identity();
+        var sensor_quaternion = new THREE.Quaternion().identity();
 
         // Action on reset button
         function reset_position() {
-            let index = document.getElementById('time').valueAsNumber;
-            reset_quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
-            reset_quaternion.invert();
+            if(sensor_data.length > 0) {
+                let index = document.getElementById('time').valueAsNumber;
+                reset_quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
+                reset_quaternion.invert();
+            }
         }
 
         // Play button management
@@ -63,33 +67,33 @@
 
         function speed() {
             play_speed *= 2;
-            if(play_speed > 16) {
+            if (play_speed > 16) {
                 play_speed = 1;
             }
             document.getElementById('play_speed').value = play_speed.toString() + "x";
         }
 
         function play_period() {
-            if(play_index < sensor_data.length - 1) {
+            if (play_index < sensor_data.length - 1) {
                 play_time += play_period_s * play_speed;
-                while(sensor_data[play_index]['Time'] < play_time) {
+                while (sensor_data[play_index]['Time'] < play_time) {
                     play_index++;
-                    if(play_index >= sensor_data.length - 1) {
+                    if (play_index >= sensor_data.length - 1) {
                         break;
                     }
                 }
                 document.getElementById('time').valueAsNumber = play_index;
             }
         }
-        
+
         function play() {
-            if(auto_play_timer != 0) {
+            if (auto_play_timer != 0) {
                 clearInterval(auto_play_timer);
                 auto_play_timer = 0;
             } else {
                 play_index = index;
                 play_time = sensor_data[play_index]['Time'];
-                auto_play_timer = setInterval(play_period, play_period_s*1000);
+                auto_play_timer = setInterval(play_period, play_period_s * 1000);
             }
         }
 
@@ -110,7 +114,7 @@
             });
             reader.readAsText(fileList[0]);
         });
-        
+
         // ------------------------------------------------
         // ThreeJS
         // ------------------------------------------------
@@ -127,11 +131,11 @@
         var renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setClearColor("#000000");
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        three_area = document.body.appendChild(renderer.domElement);
 
         // Create objects
         const loader = new THREE.ObjectLoader();
-        
+
         var cube;
         cube = loader.parse(model_data);
         scene.add(cube);
@@ -142,58 +146,56 @@
         // Manage mouse events
         // Variables pour gérer le mouvement de la caméra
         let isDragging = false;
-        let previousMousePosition = {
-        x: 0,
-        y: 0,
-        };
+        let previousMousePosition = { x: 0, y: 0 };
 
         // Écouteurs pour les événements de souris
-        document.addEventListener('mousedown', (event) => {
-        isDragging = true;
+        three_area.addEventListener('mousedown', (event) => {
+            isDragging = true;
         });
 
-        document.addEventListener('mouseup', (event) => {
-        isDragging = false;
-        reset_quaternion.copy(cube.quaternion);
-        reset_quaternion.invert();
+        three_area.addEventListener('mouseup', (event) => {
+            isDragging = false;
+            reset_quaternion.copy(sensor_quaternion);
+            reset_quaternion.invert();
+            reset_quaternion.multiply(cube.quaternion);
         });
 
-        const axis_x = new THREE.Vector3(1, 0, 0); // Rotate around the Y-axis
+        const axis_x = new THREE.Vector3(1, 0, 0); // Rotate around the X-axis
         const axis_z = new THREE.Vector3(0, 0, 1); // Rotate around the Z-axis
         const angle = Math.PI / 180; // Rotation angle in radians (1 degree per frame)
-        const quaternion_rotation_positive_x = new THREE.Quaternion();
-        const quaternion_rotation_negative_x = new THREE.Quaternion();
-        const quaternion_rotation_positive_z = new THREE.Quaternion();
-        const quaternion_rotation_negative_z = new THREE.Quaternion();
+        var quaternion_rotation_positive_x = new THREE.Quaternion();
+        var quaternion_rotation_negative_x = new THREE.Quaternion();
+        var quaternion_rotation_positive_z = new THREE.Quaternion();
+        var quaternion_rotation_negative_z = new THREE.Quaternion();
         quaternion_rotation_positive_x.setFromAxisAngle(axis_x, angle);
         quaternion_rotation_negative_x.setFromAxisAngle(axis_x, -angle);
         quaternion_rotation_positive_z.setFromAxisAngle(axis_z, angle);
         quaternion_rotation_negative_z.setFromAxisAngle(axis_z, -angle);
 
-        document.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-            const deltaMove = {
-            x: event.clientX - previousMousePosition.x,
-            y: event.clientY - previousMousePosition.y,
+        three_area.addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y,
+                };
+
+                if (deltaMove.x > 0) {
+                    cube.quaternion.multiply(quaternion_rotation_positive_x);
+                } else if (deltaMove.x < 0) {
+                    cube.quaternion.multiply(quaternion_rotation_negative_x);
+                }
+
+                if (deltaMove.y > 0) {
+                    cube.quaternion.multiply(quaternion_rotation_positive_z);
+                } else if (deltaMove.y < 0) {
+                    cube.quaternion.multiply(quaternion_rotation_negative_z);
+                }
+            }
+
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY,
             };
-
-            if(deltaMove.x > 0) {
-                cube.quaternion.multiply(quaternion_rotation_positive_x);
-            } else if (deltaMove.x < 0) {
-                cube.quaternion.multiply(quaternion_rotation_negative_x);
-            }
-
-            if(deltaMove.y > 0) {
-                cube.quaternion.multiply(quaternion_rotation_positive_z);
-            } else if (deltaMove.y < 0) {
-                cube.quaternion.multiply(quaternion_rotation_negative_z);
-            }
-        }
-
-        previousMousePosition = {
-            x: event.clientX,
-            y: event.clientY,
-        };
         });
 
         // Function to convert seconds to hours
@@ -208,13 +210,13 @@
         function render() {
             requestAnimationFrame(render);
 
-            if (sensor_data.length > 0) {
+            if ( (sensor_data.length > 0) && (isDragging == false) ){
                 // Get cursor position
                 index = document.getElementById('time').valueAsNumber;
 
                 // Update object position
-                cube.quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
-                cube.quaternion.multiply(reset_quaternion);
+                sensor_quaternion.fromArray([sensor_data[index]['x'], sensor_data[index]['y'], sensor_data[index]['z'], sensor_data[index]['w']]);
+                cube.quaternion.multiplyQuaternions(sensor_quaternion, reset_quaternion);
 
                 let lacet = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 0, 1)) * 180 / Math.PI;
                 let assiette = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 1, 0)) * 180 / Math.PI;
@@ -235,4 +237,5 @@
         render();
     </script>
 </body>
+
 </html>
