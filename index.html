@@ -21,7 +21,7 @@
     </style>
     <!-- IMPORT JS -->
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
-    <script src="3D_models/paragliding.js"></script>
+    <script src="3D_models/cam_and_axes.js"></script>
 </head>
 
 <!-- HTML BODY -->
@@ -32,7 +32,7 @@
     </div>
     <div id="value">---- / ----</div>
     <div>
-        <input type="range" id="time" name="time" min="0" max="1000" />
+        <input type="range" id="time" name="time" min="0" max="1000" value="0"/>
         <label for="time">Time</label>
     </div>
     <div>
@@ -139,6 +139,71 @@
         const axesHelper = new THREE.AxesHelper(5);
         scene.add(axesHelper);
 
+        // Manage mouse events
+        // Variables pour gérer le mouvement de la caméra
+        let isDragging = false;
+        let previousMousePosition = {
+        x: 0,
+        y: 0,
+        };
+
+        // Écouteurs pour les événements de souris
+        document.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        });
+
+        document.addEventListener('mouseup', (event) => {
+        isDragging = false;
+        reset_quaternion.copy(cube.quaternion);
+        reset_quaternion.invert();
+        });
+
+        const axis_x = new THREE.Vector3(1, 0, 0); // Rotate around the Y-axis
+        const axis_z = new THREE.Vector3(0, 0, 1); // Rotate around the Z-axis
+        const angle = Math.PI / 180; // Rotation angle in radians (1 degree per frame)
+        const quaternion_rotation_positive_x = new THREE.Quaternion();
+        const quaternion_rotation_negative_x = new THREE.Quaternion();
+        const quaternion_rotation_positive_z = new THREE.Quaternion();
+        const quaternion_rotation_negative_z = new THREE.Quaternion();
+        quaternion_rotation_positive_x.setFromAxisAngle(axis_x, angle);
+        quaternion_rotation_negative_x.setFromAxisAngle(axis_x, -angle);
+        quaternion_rotation_positive_z.setFromAxisAngle(axis_z, angle);
+        quaternion_rotation_negative_z.setFromAxisAngle(axis_z, -angle);
+
+        document.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+            const deltaMove = {
+            x: event.clientX - previousMousePosition.x,
+            y: event.clientY - previousMousePosition.y,
+            };
+
+            if(deltaMove.x > 0) {
+                cube.quaternion.multiply(quaternion_rotation_positive_x);
+            } else if (deltaMove.x < 0) {
+                cube.quaternion.multiply(quaternion_rotation_negative_x);
+            }
+
+            if(deltaMove.y > 0) {
+                cube.quaternion.multiply(quaternion_rotation_positive_z);
+            } else if (deltaMove.y < 0) {
+                cube.quaternion.multiply(quaternion_rotation_negative_z);
+            }
+        }
+
+        previousMousePosition = {
+            x: event.clientX,
+            y: event.clientY,
+        };
+        });
+
+        // Function to convert seconds to hours
+        function seconds_to_time(s) {
+            const hours = Math.floor(s / 3600);
+            const minutes = Math.floor((s % 3600) / 60);
+            const seconds = (s % 60).toFixed(2);
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
         // Render Loop
         function render() {
             requestAnimationFrame(render);
@@ -157,6 +222,7 @@
 
                 // Print debug text
                 value.innerHTML = index.toString() + " / " + sensor_data.length.toString() +
+                    " | time: " + seconds_to_time(sensor_data[index]['Time']) +
                     " | assiette: " + assiette.toFixed(0).toString() + "°" +
                     " | roulis: " + roulis.toFixed(0).toString() + "°" +
                     " | lacet: " + lacet.toFixed(0).toString() + "°";
