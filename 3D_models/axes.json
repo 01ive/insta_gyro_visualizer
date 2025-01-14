@@ -1,0 +1,93 @@
+{
+	"metadata": {
+		"version": 4.6,
+		"type": "Object",
+		"generator": "Object3D.toJSON"
+	},
+	"geometries": [
+		{
+			"uuid": "fda1bc9a-d6f9-44f5-9f1f-405bd733cd7f",
+			"type": "CylinderGeometry",
+			"radiusTop": 1,
+			"radiusBottom": 1,
+			"height": 1,
+			"radialSegments": 32,
+			"heightSegments": 1,
+			"openEnded": false,
+			"thetaStart": 0,
+			"thetaLength": 6.283185307179586
+		}],
+	"materials": [
+		{
+			"uuid": "cc877211-efd9-453f-9e9e-9145b60a5400",
+			"type": "MeshBasicMaterial",
+			"name": "red",
+			"color": 16711680,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		},
+		{
+			"uuid": "a7bb7644-5cd0-461f-a6b6-90c7839678d9",
+			"type": "MeshBasicMaterial",
+			"name": "green",
+			"color": 65280,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		},
+		{
+			"uuid": "79f24f9a-3300-4ca3-9231-ccc4d1ba3c79",
+			"type": "MeshBasicMaterial",
+			"name": "blue",
+			"color": 255,
+			"envMapRotation": [0,0,0,
+				"XYZ"],
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"blendColor": 0
+		}],
+	"object": {
+		"uuid": "d79d908b-b217-4974-bd52-2d05f2bb4dbb",
+		"type": "Group",
+		"name": "axes",
+		"layers": 1,
+		"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+		"up": [0,1,0],
+		"children": [
+			{
+				"uuid": "2cc545b4-2c85-4bcd-967c-50af860f856c",
+				"type": "Mesh",
+				"name": "X",
+				"layers": 1,
+				"matrix": [-2.220446049250313e-18,0.010000000000000002,0,0,-5.000000000000001,-1.1102230246251565e-15,0,0,0,0,0.01,0,2.5015488671409614,0,0,1],
+				"up": [0,1,0],
+				"geometry": "fda1bc9a-d6f9-44f5-9f1f-405bd733cd7f",
+				"material": "cc877211-efd9-453f-9e9e-9145b60a5400"
+			},
+			{
+				"uuid": "db0fdcc8-da40-4914-bccf-6e3d3e3b5097",
+				"type": "Mesh",
+				"name": "Y",
+				"layers": 1,
+				"matrix": [0.01,0,0,0,0,5,0,0,0,0,0.01,0,0,2.5,0,1],
+				"up": [0,1,0],
+				"geometry": "fda1bc9a-d6f9-44f5-9f1f-405bd733cd7f",
+				"material": "a7bb7644-5cd0-461f-a6b6-90c7839678d9"
+			},
+			{
+				"uuid": "bf6c57d3-22ee-4dff-89f3-aa0ef5572c03",
+				"type": "Mesh",
+				"name": "Z",
+				"layers": 1,
+				"matrix": [0,0.01,4.440892098500626e-18,0,0,-2.220446049250313e-15,5,0,0.01,0,0,0,0,0,2.497653680500579,1],
+				"up": [0,1,0],
+				"geometry": "fda1bc9a-d6f9-44f5-9f1f-405bd733cd7f",
+				"material": "79f24f9a-3300-4ca3-9231-ccc4d1ba3c79"
+			}]
+	}
+}
