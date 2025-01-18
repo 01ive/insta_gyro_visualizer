@@ -201,9 +201,9 @@
 
                 if (!event.shiftKey) {
                     if (deltaMove.x > 0) {
-                        cube.quaternion.multiply(quaternion_rotation_positive_x);
-                    } else if (deltaMove.x < 0) {
                         cube.quaternion.multiply(quaternion_rotation_negative_x);
+                    } else if (deltaMove.x < 0) {
+                        cube.quaternion.multiply(quaternion_rotation_positive_x);
                     }
                 }
 
