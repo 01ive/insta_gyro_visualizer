@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Generate
-        run:  python model_to_js.py 3D_models/paragliding.json
+        run:  python model_to_js.py 3D_models
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
