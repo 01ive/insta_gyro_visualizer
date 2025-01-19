@@ -43,3 +43,49 @@ def quaternion_to_euler(q):
     yaw = np.arctan2(siny_cosp, cosy_cosp)
 
     return roll, pitch, yaw
+
+def accelerometer_to_quaternion(ax, ay, az):
+    """
+    Convert accelerometer data to a quaternion representing orientation.
+
+    Args:
+        ax: Acceleration along X-axis.
+        ay: Acceleration along Y-axis.
+        az: Acceleration along Z-axis.
+
+    Returns:
+        A tuple (qw, qx, qy, qz) representing the quaternion.
+    """
+    # Vecteur gravité mesuré
+    measured = np.array([ax, ay, az])
+    norm = np.linalg.norm(measured)
+    if norm == 0:
+        raise ValueError("L'accélération ne peut pas être un vecteur nul.")
+    measured /= norm
+
+    # Vecteur gravité de référence
+    reference = np.array([1, 0, 0])
+
+    # Calcul de l'axe de rotation
+    axis = np.cross(measured, reference)
+    axis_norm = np.linalg.norm(axis)
+
+    # Calcul de l'angle
+    dot = np.dot(measured, reference)
+    angle = np.acos(np.clip(dot, -1.0, 1.0))
+
+    # Cas particulier : vecteurs parallèles ou antiparallèles
+    if axis_norm < 1e-6:  # Les vecteurs sont alignés ou opposés
+        if dot < 0:  # Opposés
+            # Rotation de 180° autour d'un axe orthogonal quelconque
+            axis = np.array([1, 0, 0]) if abs(measured[2]) < 0.999 else np.array([0, 1, 0])
+            qw = 0
+            qx, qy, qz = axis / np.linalg.norm(axis)
+        else:  # Alignés
+            return (1.0, 0.0, 0.0, 0.0)  # Pas de rotation
+    else:
+        axis /= axis_norm
+        qw = np.cos(angle / 2)
+        qx, qy, qz = axis * np.sin(angle / 2)
+
+    return np.array([qw, qx, qy, qz])
