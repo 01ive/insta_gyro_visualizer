@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 
 # Fonction pour normaliser un quaternion
 def normalize_quaternion(q):
@@ -58,10 +59,6 @@ def accelerometer_to_quaternion(ax, ay, az):
     """
     # Vecteur gravité mesuré
     measured = np.array([ax, ay, az])
-    norm = np.linalg.norm(measured)
-    if norm == 0:
-        raise ValueError("L'accélération ne peut pas être un vecteur nul.")
-    measured /= norm
 
     # Vecteur gravité de référence
     reference = np.array([1, 0, 0])
@@ -76,16 +73,19 @@ def accelerometer_to_quaternion(ax, ay, az):
 
     # Cas particulier : vecteurs parallèles ou antiparallèles
     if axis_norm < 1e-6:  # Les vecteurs sont alignés ou opposés
+        logging.debug("!!! Accelerometer and reference vector are aligned or opposite")
         if dot < 0:  # Opposés
+            logging.debug("!!! Accelerometer and reference vector are opposite")
             # Rotation de 180° autour d'un axe orthogonal quelconque
             axis = np.array([1, 0, 0]) if abs(measured[2]) < 0.999 else np.array([0, 1, 0])
             qw = 0
             qx, qy, qz = axis / np.linalg.norm(axis)
         else:  # Alignés
+            logging.debug("!!! Accelerometer and reference vector are aligned")
             return (1.0, 0.0, 0.0, 0.0)  # Pas de rotation
     else:
         axis /= axis_norm
         qw = np.cos(angle / 2)
         qx, qy, qz = axis * np.sin(angle / 2)
 
-    return np.array([qw, qx, qy, qz])
+    return normalize_quaternion(np.array([qw, qx, qy, qz]))

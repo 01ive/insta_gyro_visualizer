@@ -92,6 +92,21 @@ def compute_data(accelerometer_table):
     
     return accelerometer_table
 
+def low_pass_filter(accelerometer_table, columns, window=10):
+    # Smooth accelerometer data (low pass filter)
+    for c in columns:
+        accelerometer_table[c] = accelerometer_table[c].rolling(window=window, center=False).mean()
+    return accelerometer_table
+
+def normalize_data(accelerometer_table):
+    # Normalize accelerometer data
+    # return data / np.linalg.norm(data)
+    accelerometer_norm = np.sqrt(np.power(accelerometer_table['Acc X'], 2) + np.power(accelerometer_table['Acc Y'], 2) + np.power(accelerometer_table['Acc Z'], 2))
+    accelerometer_table['Acc X'] = accelerometer_table['Acc X'] / accelerometer_norm
+    accelerometer_table['Acc Y'] = accelerometer_table['Acc Y'] / accelerometer_norm
+    accelerometer_table['Acc Z'] = accelerometer_table['Acc Z'] / accelerometer_norm
+    return accelerometer_table
+
 def process_accelerometer_data(accelerometer_table):
     # Smooth accelerometer data (low pass filter)
     accelerometer_table['Acc X'] = accelerometer_table['Acc X'].rolling(window=10, center=False).mean()
@@ -135,13 +150,6 @@ def save_file(accelerometer_table, json_file_name, display_graph=False):
     # Use time col as index
     accelerometer_table = accelerometer_table.set_index('Time')
 
-    # Display graph
-    graph = accelerometer_table.plot()
-    if display_graph: graph.show()
-    html_file_name = json_file_name.split('.')[0] + '.html'
-    graph.write_html(html_file_name)
-    logging.info("Html file generated: " + html_file_name)
-
     # Generate json file
     accelerometer_table.filter(['w', 'x', 'y', 'z'], axis=1).reset_index().to_json(json_file_name, orient='records', indent=2)
 
@@ -150,12 +158,27 @@ def save_file(accelerometer_table, json_file_name, display_graph=False):
     accelerometer_table['y'] = accelerometer_table['Acc y']
     accelerometer_table['z'] = accelerometer_table['Acc z']
     accelerometer_table.filter(['w', 'x', 'y', 'z'], axis=1).reset_index().to_json(json_file_name.split('.')[0] + '_acc.json', orient='records', indent=2)
-    
     logging.info("Json file generated: " + json_file_name)
+
+    # Display graph
+    del(accelerometer_table['Acc w'])
+    del(accelerometer_table['Acc x'])
+    del(accelerometer_table['Acc y'])
+    del(accelerometer_table['Acc z'])
+    del(accelerometer_table['w'])
+    del(accelerometer_table['x'])
+    del(accelerometer_table['y'])
+    del(accelerometer_table['z'])
+
+    graph = accelerometer_table.plot()
+    if display_graph: graph.show()
+    html_file_name = json_file_name.split('.')[0] + '.html'
+    graph.write_html(html_file_name)
+    logging.info("Html file generated: " + html_file_name)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     
     json_file_name = sys.argv[1]
 
@@ -166,16 +189,24 @@ if __name__ == "__main__":
     
     # new method
     # Smooth accelerometer data (low pass filter)
-    data['Acc X'] = data['Acc X'].rolling(window=10, center=False).mean()
-    data['Acc Y'] = data['Acc Y'].rolling(window=10, center=False).mean()
-    data['Acc Z'] = data['Acc Z'].rolling(window=10, center=False).mean()
-
+    data = low_pass_filter(data, ['Acc X', 'Acc Y', 'Acc Z'], window=20)
+    data = normalize_data(data)
+    progress_bar = Bar("Processing Acc data", max=len(data.index))
     for index in data.index:
         q = quaternion.accelerometer_to_quaternion(data['Acc X'][index], data['Acc Y'][index], data['Acc Z'][index])
         data.loc[index, 'Acc w'] = q[0]
         data.loc[index, 'Acc x'] = q[1]
         data.loc[index, 'Acc y'] = q[2]
         data.loc[index, 'Acc z'] = q[3]
+        progress_bar.next()
+    progress_bar.finish()
+
+    # Generate position from in Euler format
+    data['Euler'] = data.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['Acc w'], x['Acc x'], x['Acc y'], x['Acc z']])), axis=1)
+    data['Acc Yaw'] = data.apply(lambda x: x['Euler'][0], axis=1)
+    data['Acc Roll'] = data.apply(lambda x: x['Euler'][1], axis=1)
+    data['Acc Pich'] = data.apply(lambda x: x['Euler'][2], axis=1)
+    del(data['Euler'])
 
     # Compute gyroscope data using quaternions
     result = compute_data(data)
