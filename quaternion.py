@@ -122,9 +122,13 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
     delta_q = quaternion_difference(q_acc, q_pred)
     y = delta_q[1:]  # Erreur sur les axes (x, y, z)
 
+    # Extraction des sous-matrices pour les parties vectorielles
+    P_vv = P_pred[1:, 1:]  # Sous-matrice 3x3 de P (partie vectorielle)
+    R_vv = R_acc[1:, 1:]  # Sous-matrice 3x3 de R_acc (partie vectorielle)
+
     # Calcul du gain de Kalman
-    S = P_pred + R_acc
-    K = np.dot(P_pred, np.linalg.inv(S))  # Gain de Kalman
+    S = P_vv + R_vv  # Covariance de l'erreur d'innovation
+    K = np.dot(P_vv, np.linalg.inv(S))  # Gain de Kalman (3x3)
 
     # Mise à jour de l'état
     correction = np.dot(K, y)
@@ -133,6 +137,8 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
     q_new = normalize_quaternion(q_new)
 
     # Mise à jour de la covariance
-    P_new = np.dot((np.eye(4) - K), P_pred)
+    K_full = np.zeros_like(P)  # Extension de K pour s'adapter à la dimension complète
+    K_full[1:, 1:] = K  # Insère K dans la sous-matrice vectorielle
+    P_new = np.dot((np.eye(4) - K_full), P_pred)
 
     return q_new, P_new

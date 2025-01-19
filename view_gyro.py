@@ -32,21 +32,17 @@ if __name__ == "__main__":
         video_file_name = sys.argv[1]
     else:
         logging.error("Missing video file name")
-    
+    # 
     logging.info("Processing video file " + video_file_name)
-    
     json_file = extract_info_from_video_file(video_file_name)
     logging.info("json file generated: " + json_file)
 
-    data = compute_data.read_json_file(json_file)
-
-    result = compute_data.compute_data(data)
-
-    json_file = json_file.split('.')[0] + '_compute.json'
-    compute_data.save_file(result, json_file)
-
+    logging.info("Process data")
+    compute_data.compute(json_file)
+    logging.info("End of data processing")
+    
     logging.info("Generating 3D model")
-    model_file = "3D_models//paragliding.json"
-    model_to_js.model_to_js(model_file)
+    model_dir = "3D_models"
+    model_to_js.process_models(model_dir)
 
     logging.info("End of process")

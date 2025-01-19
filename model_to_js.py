@@ -14,12 +14,7 @@ def process_json_file(json_file):
     with open(js_file_name, 'w') as f:
         f.write(text)
 
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    
-    json_file_name = sys.argv[1]
-
+def process_models(json_file_name):
     if not os.path.exists(json_file_name):
         logging.error(f"File {json_file_name} does not exist.")
         sys.exit(1)
@@ -30,4 +25,11 @@ if __name__ == "__main__":
                 process_json_file(os.path.join(json_file_name, file))
     else:       
         process_json_file(json_file_name)
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    
+    json_file_name = sys.argv[1]
+
+    process_models(json_file_name)
    

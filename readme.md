@@ -1,11 +1,18 @@
 # 3D viewer from gyroscope
 
-Access to page
+Access to page for demo
 [https://01ive.github.io/insta_gyro_visualizer](https://01ive.github.io/insta_gyro_visualizer)
 
 ## Extract info from 360 camera
 
-Using *exiftool* command line with options
+### Prerequisit
+exiftool installed.
+
+### STEP 1 - extract exif data from video file in json format
+
+This step generates a *<video_file_name>.json* file using *exiftool* command line.
+
+Used options:
 
 * **-m** ignore Minor Errors
 * **-g3** Organize output by tag group
@@ -15,26 +22,26 @@ Using *exiftool* command line with options
 
 [exiftool options documentation](https://exiftool.org/exiftool_pod.html#Option-Details)
 
-Exemple
+Exemple os exif tool usage
 
 ```bash
 exiftool -m -api largefilesupport=1 -g3 -j -ee -TimeCode -Accelerometer -AngularVelocity VID_20240530_173115_003.insv | tee tests/VID_20240530_173115_003.json
 ```
 
-## Convert text to csv data
+### STEP 2 - convert exif data from json format to csv
 
-Using Python code convert txt exiftool output to csv data
+Generates *<video_file_name>.csv* file from *<video_file_name>.json*.
 
-Exemple
+### STEP 3 - process accelerometer and gyroscope data
 
-```bash
-python convert_to_csv.py VID_20240530_173115_003.txt
-```
+Generates pickle intermediate file *<video_file_name>.pkl*
 
-## Filter and view data
+### STEP 4 - calculate Kalman filter data
 
-Using Python
+### STEP 5 - generate json files for positions
 
-```bash
-python plot_data.py
-```
+3 json files are generated including position in quaternion format:
+
+* *<video_file_name>_acc.json*
+* *<video_file_name>_gyro.json*
+* *<video_file_name>_kalman.json*
