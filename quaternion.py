@@ -89,3 +89,50 @@ def accelerometer_to_quaternion(ax, ay, az):
         qx, qy, qz = axis * np.sin(angle / 2)
 
     return normalize_quaternion(np.array([qw, qx, qy, qz]))
+
+def quaternion_difference(q1, q2):
+    """Calcule la différence entre deux quaternions."""
+    q2_conj = np.array([q2[0], -q2[1], -q2[2], -q2[3]])  # Conjugué de q2
+    return quaternion_multiply(q1, q2_conj)
+
+def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
+    """
+    Filtre de Kalman pour fusionner deux quaternions représentant des positions.
+
+    Args:
+        P: Matrice de covariance de l'état (4x4).
+        q_gyro: Quaternion provenant du gyroscope (prédiction).
+        q_acc: Quaternion provenant de l'accéléromètre (mesure).
+        R_gyro: Incertitude associée au gyroscope (bruit de processus).
+        R_acc: Incertitude associée à l'accéléromètre (bruit de mesure).
+
+    Returns:
+        q_new: Nouveau quaternion de l'état (fusionné).
+        P_new: Nouvelle matrice de covariance de l'état.
+    """
+    # Normalisation des quaternions
+    # q_gyro = normalize_quaternion(q_gyro)
+    # q_acc = normalize_quaternion(q_acc)
+
+    # Prédiction
+    q_pred = q_gyro
+    P_pred = P + R_gyro
+
+    # Innovation (erreur entre la mesure et la prédiction)
+    delta_q = quaternion_difference(q_acc, q_pred)
+    y = delta_q[1:]  # Erreur sur les axes (x, y, z)
+
+    # Calcul du gain de Kalman
+    S = P_pred + R_acc
+    K = np.dot(P_pred, np.linalg.inv(S))  # Gain de Kalman
+
+    # Mise à jour de l'état
+    correction = np.dot(K, y)
+    q_correction = np.array([np.sqrt(1 - np.sum(correction**2)), *correction])
+    q_new = quaternion_multiply(q_pred, q_correction)
+    q_new = normalize_quaternion(q_new)
+
+    # Mise à jour de la covariance
+    P_new = np.dot((np.eye(4) - K), P_pred)
+
+    return q_new, P_new
