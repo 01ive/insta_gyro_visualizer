@@ -22,6 +22,7 @@
     <!-- IMPORT JS -->
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script src="3D_models/cam_and_axes.js"></script>
+    <script src="demo.js"></script>
 </head>
 
 <!-- HTML BODY -->
@@ -38,35 +39,20 @@
     </div>
     <div>
         <input type="button" id="reset" value="Reset position" onclick="reset_position()" />
+        <input type="button" id="demo" value="demo" onclick="demo()" />
         <input type="button" id="play" value="play" onclick="play()" />
         <input type="button" id="play_speed" value="1x" onclick="speed()" />
     </div>
 
     <!-- JAVASCRIPT -->
     <script>
-        var sensor_data = [
-            {
-                "Time": 0.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            {
-                "Time": 1.0,
-                "w": 0.0,
-                "x": 1.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            {
-                "Time": 2.0,
-                "w": 0.0,
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            }
-        ];
+        var sensor_data = [{
+                            "Time":0.0,
+                            "w":0.1,
+                            "x":0.0,
+                            "y":0.0,
+                            "z":0.0
+                        }];
 
         var index = 0;
         var reset_quaternion = new THREE.Quaternion().identity();
@@ -135,6 +121,12 @@
             });
             reader.readAsText(fileList[0]);
         });
+
+        // Demo button
+        function demo() {
+            sensor_data = demo_data;
+            document.getElementById('time').max = (sensor_data.length - 1).toString();
+        }
 
         // ------------------------------------------------
         // ThreeJS
