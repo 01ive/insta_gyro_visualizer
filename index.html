@@ -39,8 +39,8 @@
     </div>
     <div>
         <input type="button" id="reset" value="Reset position" onclick="reset_position()" />
-        <input type="button" id="demo" value="demo" onclick="demo()" />
-        <input type="button" id="play" value="play" onclick="play()" />
+        <input type="button" id="demo" value="Demo" onclick="demo()" />
+        <input type="button" id="play" value="Play" onclick="play()" />
         <input type="button" id="play_speed" value="1x" onclick="speed()" />
     </div>
 
@@ -96,11 +96,13 @@
         function play() {
             if (auto_play_timer != 0) {
                 clearInterval(auto_play_timer);
+                document.getElementById('play').value = 'Play';
                 auto_play_timer = 0;
             } else {
                 play_index = index;
                 play_time = sensor_data[play_index]['Time'];
                 auto_play_timer = setInterval(play_period, play_period_s * 1000);
+                document.getElementById('play').value = 'Pause';
             }
         }
 
