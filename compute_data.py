@@ -118,14 +118,14 @@ def compute_acc(accelerometer_table):
 
 def compute_kalman_filter(accelerometer_table):
     # Calibration
-    delta_acc_w = 0.0017    #   delta_acc_w = 0.00017
-    delta_acc_x = 1.0       #   delta_acc_x = 0.0
-    delta_acc_y = 0.0085    #   delta_acc_y = -0.0085
-    delta_acc_z = 0.0065    #   delta_acc_z = -0.00065
-    delta_gyro_w = 0.00023  #   delta_gyro_w = -0.00023
-    delta_gyro_x = 0.00207  #   delta_gyro_x = 0.0207
-    delta_gyro_y = 0.00269  #   delta_gyro_y = -0.00269
-    delta_gyro_z = 0.00446  #   delta_gyro_z = 0.00446
+    delta_acc_w = 1.0    #   delta_acc_w = 0.00017
+    delta_acc_x = 0.01       #   delta_acc_x = 0.0
+    delta_acc_y = 0.005    #   delta_acc_y = -0.0085
+    delta_acc_z = 0.005    #   delta_acc_z = -0.00065
+    delta_gyro_w = 1.0  #   delta_gyro_w = -0.00023
+    delta_gyro_x = 0.002  #   delta_gyro_x = 0.0207
+    delta_gyro_y = 0.003  #   delta_gyro_y = -0.00269
+    delta_gyro_z = 0.004  #   delta_gyro_z = 0.00446
     if calibration:
         logging.info("Calibration")
         cal_table = accelerometer_table[accelerometer_table['Time'] < 7]
@@ -142,7 +142,7 @@ def compute_kalman_filter(accelerometer_table):
         logging.info("Calibration data: delta_time = " + str(delta_time) + ", delta_acc_w = " + str(delta_acc_w) + ", delta_acc_x = " + str(delta_acc_x) + ", delta_acc_y = " + str(delta_acc_y) + ", delta_acc_z = " + str(delta_acc_z) + ", delta_gyro_w = " + str(delta_gyro_w) + ", delta_gyro_x = " + str(delta_gyro_x) + ", delta_gyro_y = " + str(delta_gyro_y) + ", delta_gyro_z = " + str(delta_gyro_z))   
 
     #Apply Kalman filter
-    P_new = np.eye(4) * 0.02  # Covariance initiale
+    P_new = np.eye(4) * 0.03  # Covariance initiale
 
     R_gyro = np.eye(4) * np.array([delta_gyro_w, delta_gyro_x, delta_gyro_y, delta_gyro_z])  # Incertitude gyroscope
     R_acc = np.eye(4) * np.array([delta_acc_w, delta_acc_x, delta_acc_y, delta_acc_z]) # Incertitude accéléromètre
