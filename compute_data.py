@@ -95,7 +95,7 @@ def compute_gyro(accelerometer_table):
 
 def compute_acc(accelerometer_table):
     # Smooth accelerometer data (low pass filter)
-    accelerometer_table = low_pass_filter(accelerometer_table, ['Acc X', 'Acc Y', 'Acc Z'], window=20)
+    accelerometer_table = low_pass_filter(accelerometer_table, ['Acc X', 'Acc Y', 'Acc Z'], window=50)
     accelerometer_table = normalize_data(accelerometer_table)
     progress_bar = Bar("Processing Acc data", max=len(accelerometer_table.index))
     for index in accelerometer_table.index:
