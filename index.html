@@ -22,6 +22,7 @@
     <!-- IMPORT JS -->
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script src="3D_models/cam_and_axes.js"></script>
+    <!-- <script src="3D_models/paragliding.js"></script> -->
     <script src="demo.js"></script>
 </head>
 
@@ -226,16 +227,18 @@
         }
 
         function update_position() {
-            let lacet = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 0, 1)) * 180 / Math.PI;
-            let assiette = cube.quaternion.angleTo(new THREE.Quaternion(0, 0, 1, 0)) * 180 / Math.PI;
-            let roulis = cube.quaternion.angleTo(new THREE.Quaternion(0, 1, 0, 0)) * 180 / Math.PI;
+            const euler = new THREE.Euler();
+            euler.setFromQuaternion(cube.quaternion);
+            let yaw = THREE.MathUtils.radToDeg(euler.x);
+            let pitch = THREE.MathUtils.radToDeg(euler.z);
+            let roll = THREE.MathUtils.radToDeg(euler.y);
 
             // Print debug text
             value.innerHTML = index.toString() + " / " + sensor_data.length.toString() +
                 " | time: " + seconds_to_time(sensor_data[index]['Time']) +
-                " | assiette: " + assiette.toFixed(0).toString() + "°" +
-                " | roulis: " + roulis.toFixed(0).toString() + "°" +
-                " | lacet: " + lacet.toFixed(0).toString() + "°";
+                " | assiette: " + pitch.toFixed(0).toString() + "°" +
+                " | roulis: " + roll.toFixed(0).toString() + "°" +
+                " | lacet: " + yaw.toFixed(0).toString() + "°";
         }
 
         // Render Loop
