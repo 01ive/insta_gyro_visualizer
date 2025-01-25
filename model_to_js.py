@@ -7,7 +7,9 @@ def process_json_file(json_file):
     with open(json_file, 'r') as f:
         model_json = f.read()
     
-    text = "const model_data = " + model_json + ";"
+    base_name = os.path.basename(json_file).split('.')[0]
+
+    text = "const " + base_name + " = " + model_json + ";"
 
     js_file_name = json_file.split('.')[0] + '.js'
     logging.info("Writing model to {}".format(js_file_name))
