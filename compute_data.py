@@ -15,7 +15,7 @@ pd.options.plotting.backend = "plotly"
 calibration = False
 
 ''' Functions '''
-def read_json_file(json_file_name):
+def read_json_file(json_file_name, filtering_query=None):
     logging.info("Start computing data from file: " + json_file_name)
 
     # Generate csv file
@@ -24,6 +24,10 @@ def read_json_file(json_file_name):
     if os.path.exists(csv_file_name):
         logging.info("CSV file already exists: " + csv_file_name)
         accelerometer_table = pd.read_csv(csv_file_name, sep='\t', index_col=0)
+        
+        if filtering_query is not None:
+            logging.info("Filtering data using query: " + filtering_query)
+            accelerometer_table.query(filtering_query, inplace=True)
         return accelerometer_table
 
     logging.info("CSV file not found, generating it")
@@ -50,6 +54,7 @@ def read_json_file(json_file_name):
     logging.info("Generate columns")
     accelerometer_table = pd.DataFrame()
     accelerometer_table['Time'] = data_from_video_table['TimeCode'].apply(lambda x: float(x))
+    accelerometer_table['Time'] = accelerometer_table['Time'].apply(lambda x: x-accelerometer_table['Time'][0]) # Calculate time starting to 0
     accelerometer_table['Acc X'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[0]))
     accelerometer_table['Acc Y'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[1]))
     accelerometer_table['Acc Z'] = data_from_video_table['Accelerometer'].apply(lambda x: float(x.split(' ')[2]))
@@ -64,8 +69,6 @@ def read_json_file(json_file_name):
     return accelerometer_table
 
 def compute_gyro(accelerometer_table):
-    # Calculate time starting to 0
-    accelerometer_table['Time'] = accelerometer_table['Time'].apply(lambda x: x-accelerometer_table['Time'][0])
     accelerometer_table['Time delta'] = accelerometer_table['Time'] - accelerometer_table['Time'].shift(fill_value=0)
 
     q = np.array([1, 0, 0, 0]) # Quaternion initial
@@ -170,7 +173,7 @@ def compute_kalman_filter(accelerometer_table):
 def low_pass_filter(accelerometer_table, columns, window=10):
     # Smooth accelerometer data (low pass filter)
     for c in columns:
-        accelerometer_table[c] = accelerometer_table[c].rolling(window=window, center=False).mean()
+        accelerometer_table[c] = accelerometer_table[c].rolling(window=window, min_periods=1).mean()
     return accelerometer_table
 
 def normalize_data(accelerometer_table):
@@ -224,12 +227,12 @@ def save_file(accelerometer_table, json_file_name, display_graph=False):
     graph.write_html(html_file_name)
     logging.info("Html file generated: " + html_file_name)
 
-def compute(json_file_name):
+def compute(json_file_name, filtering_query=None):
     # Manage pickle file to save intermediate results from accelerometers and gyroscope
     pkl_file_name = json_file_name.split('.')[0] + '.pkl'
     if not os.path.exists(pkl_file_name):
         # Read json file (exiftool output)
-        data_df = read_json_file(json_file_name)
+        data_df = read_json_file(json_file_name, filtering_query)
 
         # Compute accelerometer data using quaternions
         data_df = compute_acc(data_df)
@@ -243,6 +246,9 @@ def compute(json_file_name):
         logging.info("Pickle file from previous precessing found: " + pkl_file_name)
         # Load pickle file
         data_df = pd.read_pickle(json_file_name.split('.')[0] + '.pkl')
+        if filtering_query is not None:
+            logging.info("Filtering data using query: " + filtering_query)
+            data_df.query(filtering_query, inplace=True)
 
     # Process Kalman filter
     data_df = compute_kalman_filter(data_df)
@@ -251,12 +257,11 @@ def compute(json_file_name):
     save_file(data_df, json_file_name)
 
 
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     
     # Argument 1 is json file name to process
     json_file_name = sys.argv[1]
 
-    compute(json_file_name)
+    compute(json_file_name, 'Time > 80 and Time < 85')
 
