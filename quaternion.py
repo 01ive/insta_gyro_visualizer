@@ -100,6 +100,8 @@ def quaternion_difference(q1, q2):
     q2_conj = np.array([q2[0], -q2[1], -q2[2], -q2[3]])  # Conjugué de q2
     return quaternion_multiply(q1, q2_conj)
 
+# Kalman filter
+previous_P = np.eye(4) * 0.03  # Covariance initiale
 def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
     """
     Filtre de Kalman pour fusionner deux quaternions représentant des positions.
@@ -115,9 +117,9 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
         q_new: Nouveau quaternion de l'état (fusionné).
         P_new: Nouvelle matrice de covariance de l'état.
     """
-    # Normalisation des quaternions
-    # q_gyro = normalize_quaternion(q_gyro)
-    # q_acc = normalize_quaternion(q_acc)
+    global previous_P
+    if P is None:
+        P = previous_P
 
     # Prédiction
     q_pred = q_gyro
@@ -146,4 +148,5 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
     K_full[1:, 1:] = K  # Insère K dans la sous-matrice vectorielle
     P_new = np.dot((np.eye(4) - K_full), P_pred)
 
-    return q_new, P_new
+    previous_P = P_new
+    return q_new

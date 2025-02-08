@@ -132,17 +132,16 @@ def compute_kalman_filter(accelerometer_table):
 
     R_gyro = np.eye(4) * np.array([delta_gyro_w, delta_gyro_x, delta_gyro_y, delta_gyro_z])  # Incertitude gyroscope
     R_acc = np.eye(4) * np.array([delta_acc_w, delta_acc_x, delta_acc_y, delta_acc_z]) # Incertitude accéléromètre
-    progress_bar = Bar("Processing Kalman filter", max=len(accelerometer_table.index))
-    for index in accelerometer_table.index:
-        q_gyro = np.array([accelerometer_table['Gyro w'][index], accelerometer_table['Gyro x'][index], accelerometer_table['Gyro y'][index], accelerometer_table['Gyro z'][index]])
-        q_acc = np.array([accelerometer_table['Acc w'][index], accelerometer_table['Acc x'][index], accelerometer_table['Acc y'][index], accelerometer_table['Acc z'][index]])
-        q, P_new = quaternion.kalman_filter_quaternion(P_new, q_gyro, q_acc, R_gyro, R_acc)
-        accelerometer_table.loc[index, 'Kalman w'] = q[0]
-        accelerometer_table.loc[index, 'Kalman x'] = q[1]
-        accelerometer_table.loc[index, 'Kalman y'] = q[2]
-        accelerometer_table.loc[index, 'Kalman z'] = q[3]
-        progress_bar.next()
-    progress_bar.finish()
+
+    q = accelerometer_table.apply(lambda x: quaternion.kalman_filter_quaternion( None, 
+                                                   [x['Gyro w'], x['Gyro x'], x['Gyro y'], x['Gyro z']], 
+                                                   [x['Acc w'], x['Acc x'], x['Acc y'], x['Acc z']], 
+                                                   R_gyro, R_acc ), axis=1)
+    accelerometer_table['Kalman w'] = q.apply(lambda x: x[0])
+    accelerometer_table['Kalman x'] = q.apply(lambda x: x[1])
+    accelerometer_table['Kalman y'] = q.apply(lambda x: x[2])
+    accelerometer_table['Kalman z'] = q.apply(lambda x: x[3])
+
     logging.debug("Kalman filter done. Covariance finale = " + str(P_new))
     # Generate position from in Euler format
     accelerometer_table['Euler'] = accelerometer_table.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['Kalman w'], x['Kalman x'], x['Kalman y'], x['Kalman z']])), axis=1)
@@ -246,5 +245,6 @@ if __name__ == "__main__":
     # Argument 1 is json file name to process
     json_file_name = sys.argv[1]
 
-    compute(json_file_name, 'Time > 80 and Time < 85')
+    # compute(json_file_name, 'Time > 80 and Time < 85')
+    compute(json_file_name)
 
