@@ -88,6 +88,9 @@
                     if (play_index >= sensor_data.length - 1) {
                         break;
                     }
+                } 
+                if (play_index >= sensor_data.length -1 ) {
+                    play()
                 }
                 document.getElementById('time').valueAsNumber = play_index;
             }
