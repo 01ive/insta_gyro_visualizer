@@ -6,15 +6,18 @@ def normalize_quaternion(q):
     return q / np.linalg.norm(q)
 
 # Fonction pour mettre à jour le quaternion avec le gyroscope
-previous_q = np.array([1, 0, 0, 0]) # Quaternion initial
-def update_quaternion_with_gyro(q, gyro, dt):
+previous_q = None
+def update_quaternion_with_gyro(q_init, gyro, dt):
     global previous_q
+    if previous_q is None:
+        q = q_init
+    else:
+        q = previous_q
+
     wx, wy, wz = gyro
     dq = np.array([1, wx*dt/2, wy*dt/2, wz*dt/2])
     dq = normalize_quaternion(dq)
     # Mise à jour du quaternion : q_new = q * dq
-    if q is None:
-        q = previous_q 
     q_new = quaternion_multiply(q, dq)
     previous_q = normalize_quaternion(q_new)
     return previous_q
@@ -101,8 +104,8 @@ def quaternion_difference(q1, q2):
     return quaternion_multiply(q1, q2_conj)
 
 # Kalman filter
-previous_P = np.eye(4) * 0.03  # Covariance initiale
-def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
+previous_P = None
+def kalman_filter_quaternion(P_init, q_gyro, q_acc, R_gyro, R_acc):
     """
     Filtre de Kalman pour fusionner deux quaternions représentant des positions.
 
@@ -118,7 +121,9 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
         P_new: Nouvelle matrice de covariance de l'état.
     """
     global previous_P
-    if P is None:
+    if previous_P is None:
+        P = P_init
+    else:
         P = previous_P
 
     # Prédiction
@@ -147,6 +152,6 @@ def kalman_filter_quaternion(P, q_gyro, q_acc, R_gyro, R_acc):
     K_full = np.zeros_like(P)  # Extension de K pour s'adapter à la dimension complète
     K_full[1:, 1:] = K  # Insère K dans la sous-matrice vectorielle
     P_new = np.dot((np.eye(4) - K_full), P_pred)
-
     previous_P = P_new
+    
     return q_new
