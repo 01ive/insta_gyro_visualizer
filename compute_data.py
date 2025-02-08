@@ -66,21 +66,12 @@ def read_json_file(json_file_name, filtering_query=None):
 def compute_gyro(accelerometer_table):
     accelerometer_table['Time delta'] = accelerometer_table['Time'] - accelerometer_table['Time'].shift(fill_value=0)
 
-    q = np.array([1, 0, 0, 0]) # Quaternion initial
-    progress_bar = Bar("Processing gyro data", max=len(accelerometer_table.index))
-    for index in accelerometer_table.index:
-        # Mise à jour avec le gyroscope
-        gyro_data = np.array([accelerometer_table['Rot X'][index], accelerometer_table['Rot Y'][index], accelerometer_table['Rot Z'][index]])
-
-        q = quaternion.update_quaternion_with_gyro(q, gyro_data, accelerometer_table['Time delta'][index])
-
-        accelerometer_table.loc[index, 'Gyro w'] = q[0]
-        accelerometer_table.loc[index, 'Gyro x'] = q[1]
-        accelerometer_table.loc[index, 'Gyro y'] = q[2]
-        accelerometer_table.loc[index, 'Gyro z'] = q[3]
-        progress_bar.next()
-
-    progress_bar.finish()
+    # Processing gyro data
+    q = accelerometer_table.apply(lambda x: quaternion.update_quaternion_with_gyro(None, np.array([x['Rot X'], x['Rot Y'], x['Rot Z']]), x['Time delta']), axis=1)
+    accelerometer_table['Gyro w'] = q.apply(lambda x: x[0])
+    accelerometer_table['Gyro x'] = q.apply(lambda x: x[1])
+    accelerometer_table['Gyro y'] = q.apply(lambda x: x[2])
+    accelerometer_table['Gyro z'] = q.apply(lambda x: x[3])
 
     # Generate position from in Euler format
     accelerometer_table['Euler'] = accelerometer_table.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['Gyro w'], x['Gyro x'], x['Gyro y'], x['Gyro z']])), axis=1)
@@ -95,15 +86,12 @@ def compute_acc(accelerometer_table):
     # Smooth accelerometer data (low pass filter)
     accelerometer_table = low_pass_filter(accelerometer_table, ['Acc X', 'Acc Y', 'Acc Z'], window=50)
     accelerometer_table = normalize_data(accelerometer_table)
-    progress_bar = Bar("Processing Acc data", max=len(accelerometer_table.index))
-    for index in accelerometer_table.index:
-        q = quaternion.accelerometer_to_quaternion(accelerometer_table['Acc X'][index], accelerometer_table['Acc Y'][index], accelerometer_table['Acc Z'][index])
-        accelerometer_table.loc[index, 'Acc w'] = q[0]
-        accelerometer_table.loc[index, 'Acc x'] = q[1]
-        accelerometer_table.loc[index, 'Acc y'] = q[2]
-        accelerometer_table.loc[index, 'Acc z'] = q[3]
-        progress_bar.next()
-    progress_bar.finish()
+
+    q = accelerometer_table.apply(lambda x: quaternion.accelerometer_to_quaternion(x['Acc X'], x['Acc Y'], x['Acc Z']), axis=1)
+    accelerometer_table['Acc w'] = q.apply(lambda x: x[0])
+    accelerometer_table['Acc x'] = q.apply(lambda x: x[1])
+    accelerometer_table['Acc y'] = q.apply(lambda x: x[2])
+    accelerometer_table['Acc z'] = q.apply(lambda x: x[3])
 
     # Generate position from in Euler format
     accelerometer_table['Euler'] = accelerometer_table.apply(lambda x: quaternion.quaternion_to_euler(np.array([x['Acc w'], x['Acc x'], x['Acc y'], x['Acc z']])), axis=1)

@@ -6,13 +6,18 @@ def normalize_quaternion(q):
     return q / np.linalg.norm(q)
 
 # Fonction pour mettre à jour le quaternion avec le gyroscope
+previous_q = np.array([1, 0, 0, 0]) # Quaternion initial
 def update_quaternion_with_gyro(q, gyro, dt):
+    global previous_q
     wx, wy, wz = gyro
     dq = np.array([1, wx*dt/2, wy*dt/2, wz*dt/2])
     dq = normalize_quaternion(dq)
     # Mise à jour du quaternion : q_new = q * dq
+    if q is None:
+        q = previous_q 
     q_new = quaternion_multiply(q, dq)
-    return normalize_quaternion(q_new)
+    previous_q = normalize_quaternion(q_new)
+    return previous_q
 
 # Multiplication de quaternions
 def quaternion_multiply(q1, q2):
