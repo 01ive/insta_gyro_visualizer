@@ -1,6 +1,7 @@
 import sys
 import subprocess
 import logging
+import argparse
 
 import compute_data
 import model_to_js
@@ -28,17 +29,32 @@ def extract_info_from_video_file(video_file_name):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", type=str)
+    parser.add_argument("-q", "--query", type=str)
+    parser.add_argument("-c", "--calibration", action='store_true')
+    parser.add_argument("-f", "--force", action='store_true')
+    args = parser.parse_args()
+
+    query = args.query
+    calibration = args.calibration
+    force = args.force
+
     if len(sys.argv) > 1:
         video_file_name = sys.argv[1]
     else:
         logging.error("Missing video file name")
-    # 
-    logging.info("Processing video file " + video_file_name)
-    json_file = extract_info_from_video_file(video_file_name)
-    logging.info("json file generated: " + json_file)
+
+    video_file_name = args.input
+    if video_file_name[-4:] == 'insv':
+        logging.info("Processing video file " + video_file_name)
+        json_file = extract_info_from_video_file(video_file_name)
+        logging.info("json file generated: " + json_file)
+    elif video_file_name[-4:] == 'json':
+        json_file = video_file_name
 
     logging.info("Process data")
-    compute_data.compute(json_file)
+    compute_data.compute(json_file, query, calibration, force)
     logging.info("End of data processing")
     
     logging.info("Generating 3D model")

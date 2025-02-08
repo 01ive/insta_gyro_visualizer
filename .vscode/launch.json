@@ -31,7 +31,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "view_gyro.py",
-            "args": ["tests//VID_20240530_173115_003.insv"],
+            "args": ["-i", "tests//VID_20240530_173115_003.json"],
             "console": "integratedTerminal"
         }
     ]

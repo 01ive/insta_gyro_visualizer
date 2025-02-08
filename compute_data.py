@@ -12,13 +12,13 @@ pd.options.plotting.backend = "plotly"
 calibration = True
 
 ''' Functions '''
-def read_json_file(json_file_name, filtering_query=None):
+def read_json_file(json_file_name, filtering_query=None, force=False):
     logging.info("Start computing data from file: " + json_file_name)
 
     # Generate csv file
     csv_file_name = json_file_name.split('.')[0] + '.csv'
 
-    if os.path.exists(csv_file_name):
+    if os.path.exists(csv_file_name) and not force:
         logging.info("CSV file already exists: " + csv_file_name)
         accelerometer_table = pd.read_csv(csv_file_name, sep='\t', index_col=0)
         
@@ -101,7 +101,7 @@ def compute_acc(accelerometer_table):
 
     return result
 
-def compute_kalman_filter(accelerometer_table):
+def compute_kalman_filter(accelerometer_table, calibration=False):
     result = pd.DataFrame()
     if calibration:
         logging.info("Calibration activated")
@@ -204,12 +204,12 @@ def save_file(accelerometer_table, json_file_name, display_graph=False):
     graph.write_html(html_file_name)
     logging.info("Html file generated: " + html_file_name)
 
-def compute(json_file_name, filtering_query=None):
+def compute(json_file_name, filtering_query=None, calibration=False, force=False):
     # Manage pickle file to save intermediate results from accelerometers and gyroscope
     pkl_file_name = json_file_name.split('.')[0] + '.pkl'
-    if not os.path.exists(pkl_file_name):
+    if not os.path.exists(pkl_file_name) or force:
         # Read json file (exiftool output)
-        data_df = read_json_file(json_file_name, filtering_query)
+        data_df = read_json_file(json_file_name, filtering_query, force)
 
         # Compute accelerometer data using quaternions
         data_acc = compute_acc(data_df[['Acc X', 'Acc Y', 'Acc Z']])
@@ -230,7 +230,7 @@ def compute(json_file_name, filtering_query=None):
             data_df.query(filtering_query, inplace=True)
 
     # Process Kalman filter
-    data_kalman = compute_kalman_filter(data_df)
+    data_kalman = compute_kalman_filter(data_df, calibration)
     data_df = pd.concat([data_df, data_kalman], axis=1)
 
     json_file_name = json_file_name.split('.')[0] + '_compute.json'
