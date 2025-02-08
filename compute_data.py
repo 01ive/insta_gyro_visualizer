@@ -44,12 +44,7 @@ def read_json_file(json_file_name, filtering_query=None):
 
     # Convert to pandas dataframe
     logging.info("Convert to pandas dataframe")
-    progress_bar = Bar("Processing data", max=len(data_from_video))
-    data_from_video_table = pd.DataFrame(columns=data_from_video[list(data_from_video.keys())[0]].keys())
-    for item in data_from_video:
-        data_from_video_table.loc[item] = data_from_video[item]
-        progress_bar.next()
-    progress_bar.finish()
+    data_from_video_table = pd.read_json(json.dumps(data_from_video), orient='index')
 
     logging.info("Generate columns")
     accelerometer_table = pd.DataFrame()
