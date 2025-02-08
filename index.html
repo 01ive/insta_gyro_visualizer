@@ -18,6 +18,15 @@
         #time {
             width: 90%
         }
+        #floating_text {
+            position: fixed;
+            top: 80px;
+            color: red;
+            font-size: 30px;
+        }
+        #scene {
+            background-color: green;
+        }
     </style>
     <!-- IMPORT JS -->
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
@@ -42,6 +51,20 @@
         <input type="button" id="demo" value="Demo" onclick="demo()" />
         <input type="button" id="play" value="Play" onclick="play()" />
         <input type="button" id="play_speed" value="1x" onclick="speed()" />
+    </div>
+    <div id="scene"></div>
+    <div id="floating_text">
+        <table>
+            <tr>
+                <td>assiette</td><td id="pitch_id">0°</td>
+            </tr>
+            <tr>
+                <td>roulis</td><td id="roll_id">0°</td>
+            </tr>
+            <tr>
+                <td>lacet</td><td id="yaw_id">0°</td>
+            </tr>
+        </table>
     </div>
 
     <!-- JAVASCRIPT -->
@@ -75,7 +98,7 @@
         function speed() {
             play_speed *= 2;
             if (play_speed > 16) {
-                play_speed = 1;
+                play_speed = 0.25;
             }
             document.getElementById('play_speed').value = play_speed.toString() + "x";
         }
@@ -149,7 +172,8 @@
         var renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setClearColor("#000000");
         renderer.setSize(window.innerWidth, window.innerHeight);
-        three_area = document.body.appendChild(renderer.domElement);
+        three_area = document.getElementById("scene").appendChild(renderer.domElement);
+        // three_area = document.body.appendChild(renderer.domElement);
 
         // Create objects
         const loader = new THREE.ObjectLoader();
@@ -158,8 +182,8 @@
         cube = loader.parse(paragliding);
         scene.add(cube);
 
-        const axesHelper = new THREE.AxesHelper(5);
-        scene.add(axesHelper);
+        // const axesHelper = new THREE.AxesHelper(5);
+        // scene.add(axesHelper);
 
         // Manage mouse events
         // Variables pour gérer le mouvement de la caméra
@@ -241,6 +265,10 @@
                 " | assiette: " + pitch.toFixed(0).toString() + "°" +
                 " | roulis: " + roll.toFixed(0).toString() + "°" +
                 " | lacet: " + yaw.toFixed(0).toString() + "°";
+
+            yaw_id.innerHTML = yaw.toFixed(0).toString() + "°"
+            pitch_id.innerHTML = pitch.toFixed(0).toString() + "°"
+            roll_id.innerHTML = roll.toFixed(0).toString() + "°"
         }
 
         // Render Loop
